@@ -84,7 +84,7 @@ pytest                              # không cần key, không tốn quota
 | **Gemini API key** (bắt buộc để chạy thật) | https://aistudio.google.com → Get API key | `backend/.env`: `GEMINI_API_KEY=...` |
 | **JWT_SECRET** (bắt buộc khi deploy) | `python -c "import secrets; print(secrets.token_hex(32))"` | `backend/.env`: `JWT_SECRET=...` |
 | **Mật khẩu quản lý** | Tự đặt | `backend/.env`: `MANAGER_PASSWORD=...` (tên đăng nhập `MANAGER_USERNAME`, mặc định `quanly`) |
-| Tên model (tùy chọn) | AI Studio, mục Models | `GEMINI_MODEL`, `GEMINI_MODEL_STRONG` (mặc định `gemini-2.5-flash`) |
+| Tên model (tùy chọn) | AI Studio, mục Models | `GEMINI_MODEL`, `GEMINI_MODEL_STRONG` (mặc định `gemini-flash-latest`) |
 | Lỗi sai đã được giáo viên duyệt | File Excel 56 lỗi, cột `trang_thai` = Đồng ý | `python scripts/xlsx_to_csv.py <file.xlsx>`, rồi đặt `ONLY_APPROVED=1` |
 
 **Không commit file `.env`.** `.gitignore` đã chặn sẵn. Mỗi lượt chat gọi Gemini 2 lần, cuối buổi thêm 2 lần (chấm điểm + Coach).

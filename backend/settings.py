@@ -19,8 +19,8 @@ def _flag(name, default="0"):
 
 class Settings:
     gemini_api_key = os.getenv("GEMINI_API_KEY", "")
-    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-    model_strong = os.getenv("GEMINI_MODEL_STRONG") or os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    model = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
+    model_strong = os.getenv("GEMINI_MODEL_STRONG") or os.getenv("GEMINI_MODEL", "gemini-flash-latest")
     fake_llm = _flag("FAKE_LLM")
     debug = _flag("DEBUG", "1")
     only_approved = _flag("ONLY_APPROVED")

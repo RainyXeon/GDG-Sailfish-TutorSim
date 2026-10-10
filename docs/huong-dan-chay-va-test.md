@@ -44,7 +44,7 @@ Mở `backend/.env`, điền:
 | `GEMINI_API_KEY` | Key lấy ở https://aistudio.google.com → Get API key | Có (để Nam trả lời thật). Chưa có thì đặt `FAKE_LLM=1` |
 | `JWT_SECRET` | Chạy `python -c "import secrets; print(secrets.token_hex(32))"` rồi dán kết quả | Nên đặt ngay; bắt buộc khi deploy |
 | `MANAGER_PASSWORD` | Mật khẩu cho tài khoản quản lý `quanly` | Có, nếu muốn xem dashboard |
-| `GEMINI_MODEL` | Tên model trong AI Studio, mặc định `gemini-2.5-flash` | Không |
+| `GEMINI_MODEL` | Tên model trong AI Studio, mặc định `gemini-flash-latest` | Không |
 
 **Không gửi file `.env` cho ai, không commit, không dán key vào chat.** Mỗi thành viên nên dùng key của riêng mình khi thử.
 
@@ -60,6 +60,15 @@ Thử API trên trang `/docs`:
 1. `POST /api/auth/login` với `{"username": "minh", "password": "demo1234"}` → chép `token`.
 2. Bấm nút **Authorize** (ổ khóa, góc trên) → dán token → Authorize.
 3. Thử `POST /api/sessions` với `{"chuyen_de": "ham_so"}`, rồi `POST /api/sessions/{id}/messages`.
+
+### Lỗi hay gặp khi chạy thật
+
+| Thấy gì | Nghĩa là | Làm gì |
+|---|---|---|
+| `503` có chữ `404 NOT_FOUND` hoặc `model ... is no longer available` | Tên model trong `.env` đã bị Google ngừng | Đổi `GEMINI_MODEL`, `GEMINI_MODEL_STRONG` sang tên mới (thông báo lỗi thường gợi ý tên, hoặc xem trong AI Studio) rồi khởi động lại server |
+| `503` có chữ `429` hoặc `RESOURCE_EXHAUSTED` | Hết quota miễn phí | Đợi vài phút, hoặc dùng key của thành viên khác; khi chỉ sửa code thì bật `FAKE_LLM=1` |
+| `503` có chữ `API key not valid` | Sai key | Kiểm tra dòng `GEMINI_API_KEY` không thừa dấu cách, dấu ngoặc kép |
+| `401` "Phiên đăng nhập đã hết hạn" | Server khởi động lại khi chưa đặt `JWT_SECRET` | Đăng nhập lại; đặt `JWT_SECRET` trong `.env` thì hết |
 
 ## 4. Thử học sinh ảo bằng CLI (việc quan trọng nhất)
 
