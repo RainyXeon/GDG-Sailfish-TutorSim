@@ -39,7 +39,7 @@ Gemini chỉ làm việc cần hiểu ngôn ngữ; việc cần chắc chắn (h
 
 Hướng dẫn đầy đủ từng bước, kèm cách kiểm tra từng phần: **[docs/huong-dan-chay-va-test.md](docs/huong-dan-chay-va-test.md)**. Tóm tắt:
 
-Cần: Python 3.11+, Node.js 18+.
+Cần: **Python 3.11, 3.12 hoặc 3.13** (khuyên dùng 3.12; bản quá mới như 3.14, 3.15 thường chưa có sẵn thư viện, `pip install` sẽ lỗi), Node.js 18+.
 
 ### 1. Backend
 ```bash

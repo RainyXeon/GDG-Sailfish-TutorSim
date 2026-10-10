@@ -4,7 +4,9 @@ Làm lần lượt từ trên xuống. Mỗi bước có "Đạt khi" để bi�
 
 ## 0. Chuẩn bị (1 lần mỗi máy)
 
-- Cài **Python 3.11+** (python.org, nhớ tick "Add to PATH" trên Windows) và **Node.js 18+** (nodejs.org).
+- Cài **Python 3.12** (python.org, nhớ tick "Add to PATH" trên Windows; 3.11 và 3.13 cũng được) và **Node.js 18+** (nodejs.org).
+  Đừng dùng Python 3.14, 3.15: nhiều thư viện chưa có bản cài sẵn, `pip install` sẽ đòi "Microsoft Visual C++ Build Tools" rồi lỗi.
+  Máy đã có nhiều bản Python (Windows): tạo môi trường bằng `py -3.12 -m venv .venv` thay cho `python -m venv .venv`.
 - Lấy code: `git clone https://github.com/ntanthedev/GDG-Starie.git`, rồi `git checkout claude/hoan-thien-mvp` (hoặc `main` nếu PR đã được merge).
 
 ## 1. Cài backend và chạy test (không cần API key)
