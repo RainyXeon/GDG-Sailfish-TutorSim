@@ -7,7 +7,7 @@ from typing import Literal, Optional
 
 from fastapi import Depends, FastAPI, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel
 
 from settings import settings
@@ -230,6 +230,12 @@ class StudentSummaryOut(BaseModel):
 
 
 # ================== TÀI KHOẢN ==================
+@app.get("/", include_in_schema=False)
+def root():
+    """Mở http://localhost:8000 sẽ tự chuyển sang trang thử API."""
+    return RedirectResponse("/docs")
+
+
 @app.get("/api/health")
 def health():
     return {"ok": True, "fake_llm": settings.fake_llm, "debug": settings.debug,
