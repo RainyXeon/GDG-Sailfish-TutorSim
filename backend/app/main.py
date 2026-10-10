@@ -5,7 +5,8 @@ File này chỉ nhận/trả dữ liệu; mọi logic ở app/services.py và ag
 """
 from typing import Literal, Optional
 
-from fastapi import Depends, FastAPI, Header, Request
+from fastapi import Depends, FastAPI, Request
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel
@@ -25,11 +26,15 @@ def _service_error(_: Request, e: S.ServiceError):
 
 
 # ================== Đăng nhập & phân quyền ==================
-def current_user(authorization: Optional[str] = Header(default=None)):
+# HTTPBearer làm hiện nút "Authorize" trên trang /docs để dán token khi thử API
+bearer = HTTPBearer(auto_error=False, description="Dán token lấy từ POST /api/auth/login")
+
+
+def current_user(cred: Optional[HTTPAuthorizationCredentials] = Depends(bearer)):
     """Đọc 'Authorization: Bearer <token>'. Sai / thiếu / hết hạn -> 401."""
-    if not authorization or not authorization.lower().startswith("bearer "):
+    if cred is None or cred.scheme.lower() != "bearer":
         raise S.ServiceError(401, "Chưa đăng nhập")
-    uid = decode_token(authorization.split(" ", 1)[1].strip())
+    uid = decode_token(cred.credentials.strip())
     user = S.get_user(uid) if uid else None
     if not user:
         raise S.ServiceError(401, "Phiên đăng nhập đã hết hạn, hãy đăng nhập lại")

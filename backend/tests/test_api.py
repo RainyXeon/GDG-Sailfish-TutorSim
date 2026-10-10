@@ -17,6 +17,7 @@ def auth(username, password="demo1234"):
 def test_chua_dang_nhap_thi_401():
     assert c.get("/api/health").status_code == 200                      # công khai
     assert c.get("/", follow_redirects=False).headers["location"] == "/docs"
+    assert "HTTPBearer" in c.get("/openapi.json").json()["components"]["securitySchemes"]   # nút Authorize trên /docs
     assert c.get("/api/exams").status_code == 401
     assert c.post("/api/sessions", json={"chuyen_de": "ham_so"}).status_code == 401
     assert c.get("/api/exams", headers={"Authorization": "Bearer token-gia"}).status_code == 401
