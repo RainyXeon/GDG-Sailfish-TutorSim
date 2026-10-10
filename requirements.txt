@@ -1,5 +1,0 @@
-google-genai
-pydantic
-sympy
-python-dotenv
-pytest
