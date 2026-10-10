@@ -205,3 +205,16 @@ tr:last-child td { border-bottom: 0; }
 .rv-head { margin: 0; display: flex; justify-content: space-between; gap: 12px; font-weight: 600; font-size: 15px; }
 .rv-exp { margin: 6px 0 0; color: var(--muted); font-size: 15px; }
 @media (max-width: 600px) { .opts { grid-template-columns: 1fr; } }
+
+/* ---------- Đăng nhập ---------- */
+.auth-seg { margin-top: 24px; }
+.auth-form { display: grid; gap: 14px; margin-top: 8px; max-width: 420px; }
+.field { display: grid; gap: 6px; font-weight: 600; font-size: 15px; }
+.field input {
+  font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); color: var(--text);
+}
+.field input:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+.field .seg { margin-bottom: 0; }
+.auth-form .btn.primary { justify-self: start; }
+.hint-login { margin-top: 20px; }

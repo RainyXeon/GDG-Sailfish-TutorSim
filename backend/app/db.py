@@ -13,8 +13,9 @@ _lock = threading.Lock()
 _conn = None
 
 SCHEMA = """
-CREATE TABLE IF NOT EXISTS tutors   (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
-CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL UNIQUE, password_hash TEXT NOT NULL,
+  name TEXT NOT NULL, role TEXT NOT NULL CHECK (role IN ('tutor', 'student', 'manager')), created_at TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS sessions (
   id INTEGER PRIMARY KEY AUTOINCREMENT, tutor_id INTEGER NOT NULL, chuyen_de TEXT NOT NULL,
   misconception_id TEXT NOT NULL, persona TEXT NOT NULL, state_json TEXT NOT NULL,
@@ -30,8 +31,9 @@ CREATE TABLE IF NOT EXISTS attempts (
   exam_title TEXT NOT NULL, score10 REAL NOT NULL, correct INTEGER NOT NULL, total INTEGER NOT NULL,
   time_spent_sec INTEGER NOT NULL, results_json TEXT NOT NULL, created_at TEXT NOT NULL);
 """
-SEED_TUTORS = ["Minh", "Lan", "Tuấn"]
-SEED_STUDENTS = ["Hà", "Khoa"]
+# Tài khoản thử, chỉ tạo khi SEED_DEMO=1 (mật khẩu = DEMO_PASSWORD). TẮT khi deploy thật.
+DEMO_USERS = [("minh", "Minh", "tutor"), ("lan", "Lan", "tutor"), ("tuan", "Tuấn", "tutor"),
+              ("ha", "Hà", "student"), ("khoa", "Khoa", "student")]
 
 
 def now():
@@ -44,11 +46,22 @@ def conn():
         _conn = sqlite3.connect(settings.db_path, check_same_thread=False)
         _conn.row_factory = sqlite3.Row
         _conn.executescript(SCHEMA)
-        if not _conn.execute("SELECT 1 FROM tutors LIMIT 1").fetchone():
-            _conn.executemany("INSERT INTO tutors(name) VALUES (?)", [(n,) for n in SEED_TUTORS])
-            _conn.executemany("INSERT INTO students(name) VALUES (?)", [(n,) for n in SEED_STUDENTS])
+        _seed(_conn)
         _conn.commit()
     return _conn
+
+
+def _seed(c):
+    from .security import hash_password  # import muộn để tránh vòng lặp
+    wanted = []
+    if settings.seed_demo:
+        wanted += [(u, n, r, settings.demo_password) for u, n, r in DEMO_USERS]
+    if settings.manager_username and settings.manager_password:
+        wanted.append((settings.manager_username, "Quản lý trung tâm", "manager", settings.manager_password))
+    for username, name, role, pw in wanted:
+        if not c.execute("SELECT 1 FROM users WHERE username = ?", (username,)).fetchone():
+            c.execute("INSERT INTO users(username, password_hash, name, role, created_at) VALUES (?,?,?,?,?)",
+                      (username, hash_password(pw), name, role, now()))
 
 
 def reset(path):

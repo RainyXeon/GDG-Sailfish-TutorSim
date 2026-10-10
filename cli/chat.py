@@ -2,9 +2,12 @@
 CLI THỬ NGHIỆM HỌC SINH ẢO - là "khách" gọi REST API, KHÔNG chứa logic agent.
 1) Chạy backend trước:  cd backend && uvicorn app.main:app --reload
 2) Chạy:               python cli/chat.py          (gõ q để kết thúc và chấm điểm)
+Đăng nhập bằng tài khoản gia sư (mặc định tài khoản thử "minh" / mật khẩu trong DEMO_PASSWORD).
+Đặt sẵn để khỏi gõ lại:  CLI_USERNAME=minh  CLI_PASSWORD=demo1234
 Mỗi phiên lưu 1 file vào cli/logs/ để gate_report.py tổng hợp.
 Chỉ dùng thư viện có sẵn của Python, không cần cài thêm.
 """
+import getpass
 import json
 import os
 import sys
@@ -15,11 +18,15 @@ from pathlib import Path
 
 API = os.getenv("API_URL", "http://localhost:8000")
 LOG_DIR = Path(__file__).parent / "logs"
+TOKEN = None
 
 
 def call(method, path, body=None):
     data = json.dumps(body).encode() if body is not None else None
-    req = urllib.request.Request(API + path, data=data, method=method, headers={"Content-Type": "application/json"})
+    headers = {"Content-Type": "application/json"}
+    if TOKEN:
+        headers["Authorization"] = f"Bearer {TOKEN}"
+    req = urllib.request.Request(API + path, data=data, method=method, headers=headers)
     try:
         with urllib.request.urlopen(req, timeout=120) as r:
             return json.loads(r.read().decode())
@@ -50,9 +57,15 @@ def main():
     if not health["debug"]:
         print("Lưu ý: backend đang tắt DEBUG nên không xem được trạng thái ẩn của Nam.")
     print(f"Backend: {'GIẢ (FAKE_LLM=1)' if health['fake_llm'] else 'Gemini thật'}")
-    tester = input("Tên người thử nghiệm: ").strip() or "an_danh"
-    tutors = call("GET", "/api/tutors")
-    tutor_id = choose("Đóng vai gia sư nào:", [(t["id"], t["name"]) for t in tutors])
+    global TOKEN
+    username = os.getenv("CLI_USERNAME") or input("Tên đăng nhập gia sư [minh]: ").strip() or "minh"
+    password = os.getenv("CLI_PASSWORD") or getpass.getpass("Mật khẩu: ")
+    auth = call("POST", "/api/auth/login", {"username": username, "password": password})
+    TOKEN = auth["token"]
+    if auth["user"]["role"] != "tutor":
+        raise SystemExit("CLI dùng để thử học sinh ảo, hãy đăng nhập bằng tài khoản gia sư.")
+    print(f"Đã đăng nhập: {auth['user']['name']} ({auth['user']['username']})")
+    tester = input("Tên người thử nghiệm (ghi vào log): ").strip() or username
     cd = choose("Chuyên đề:", [("ham_so", "Hàm số"), ("oxyz", "Hình học Oxyz")])
     mis = call("GET", f"/api/misconceptions?chuyen_de={cd}")
     mid = choose("Lỗi sai của Nam:", [(m["id"], f"{m['id']}  {m['ten_loi']}") for m in mis], allow_skip=True)
@@ -60,7 +73,7 @@ def main():
     persona = choose("Tính cách của Nam:", [(p["id"], p["ten"]) for p in personas], allow_skip=True)
     intent = choose("Lần này bạn định giảng TỐT hay cố tình giảng KÉM/SAI?", [("tot", "tốt"), ("kem", "kém / sai")])
 
-    s = call("POST", "/api/sessions", {"tutor_id": tutor_id, "chuyen_de": cd, "misconception_id": mid, "persona": persona})
+    s = call("POST", "/api/sessions", {"chuyen_de": cd, "misconception_id": mid, "persona": persona})
     sid = s["session_id"]
     dbg = call("GET", f"/api/sessions/{sid}/debug") if health["debug"] else {}
     print("\n" + "=" * 64)

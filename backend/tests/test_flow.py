@@ -31,20 +31,20 @@ def test_phien_luyen_tap_tu_dau_den_cuoi():
 
 def test_coach_tu_chon_va_uu_tien_loi_hoc_sinh_that():
     # học sinh làm đề: chọn B ở Q02 -> lỗi HS-07
-    res = S.submit_attempt(1, "de-01", {"Q02": "B"}, 300)
+    res = S.submit_attempt(4, "de-01", {"Q02": "B"}, 300)            # học sinh Hà
     assert any(r["misconception_id"] == "HS-07" for r in res["results"])
     assert S.center_top_misconceptions()[0]["id"] == "HS-07"
-    s = S.start_session(2, "ham_so")                                # không chỉ định -> Coach chọn
+    s = S.start_session(2, "ham_so")                                # gia sư Lan, không chỉ định -> Coach chọn
     dbg = S.session_debug(s["session_id"])
     assert dbg["misconception_id"] == "HS-07" and dbg["persona"] == "thu_dong"
     assert dbg["coach"]["source"] == "rule" and dbg["coach"]["reason"]
 
 
 def test_phan_he_2_du_doan():
-    assert S.student_summary(2)["prediction"] is None
-    S.submit_attempt(2, "de-01", {f"Q{i:02d}": "A" for i in range(1, 11)}, 600)   # đáp án đúng đều là A
-    S.submit_attempt(2, "de-02", {}, 600)
-    summ = S.student_summary(2)
+    assert S.student_summary(5)["prediction"] is None             # học sinh Khoa
+    S.submit_attempt(5, "de-01", {f"Q{i:02d}": "A" for i in range(1, 11)}, 600)   # đáp án đúng đều là A
+    S.submit_attempt(5, "de-02", {}, 600)
+    summ = S.student_summary(5)
     assert [a["score10"] for a in summ["attempts"]] == [0.0, 10.0]
     p = summ["prediction"]
     assert p["low"] <= p["mid"] <= p["high"]
@@ -55,3 +55,8 @@ def test_phan_he_2_du_doan():
 def test_dashboard():
     rows = S.dashboard()
     assert rows[0]["name"] == "Minh" and rows[0]["sessions_count"] >= 1
+
+
+def test_hoc_sinh_khong_mo_duoc_phien_gia_su():
+    with pytest.raises(S.ServiceError):
+        S.start_session(4, "ham_so")

@@ -14,6 +14,7 @@ from agent.state_machine import DA_HIEU, KnowledgeState
 from settings import settings
 
 from . import db, exam_service
+from .security import create_token, hash_password, verify_password
 
 STUDENT_NAME = "Nam"
 
@@ -24,13 +25,59 @@ class ServiceError(Exception):
         self.status, self.message = status, message
 
 
+# ======================= TÀI KHOẢN =======================
+USER_FIELDS = "id, username, name, role, created_at"
+USERNAME_RE = __import__("re").compile(r"^[a-z0-9_.]{3,32}$")
+
+
+def get_user(user_id):
+    return db.one(f"SELECT {USER_FIELDS} FROM users WHERE id = ?", (user_id,))
+
+
+def register(username, password, name, role):
+    if not settings.allow_register:
+        raise ServiceError(403, "Đang tắt tự đăng ký. Liên hệ quản lý trung tâm.")
+    username = (username or "").strip().lower()
+    name = (name or "").strip()
+    if role not in ("tutor", "student"):
+        raise ServiceError(400, "Chỉ tự đăng ký được vai gia sư (tutor) hoặc học sinh (student)")
+    if not USERNAME_RE.match(username):
+        raise ServiceError(400, "Tên đăng nhập 3–32 ký tự, chỉ gồm chữ thường không dấu, số, dấu chấm, gạch dưới")
+    if len(password or "") < 8:
+        raise ServiceError(400, "Mật khẩu cần ít nhất 8 ký tự")
+    if not name or len(name) > 60:
+        raise ServiceError(400, "Cần nhập tên hiển thị (tối đa 60 ký tự)")
+    if db.one("SELECT 1 AS x FROM users WHERE username = ?", (username,)):
+        raise ServiceError(409, "Tên đăng nhập đã có người dùng")
+    uid = db.run("INSERT INTO users(username, password_hash, name, role, created_at) VALUES (?,?,?,?,?)",
+                 (username, hash_password(password), name, role, db.now()))
+    user = get_user(uid)
+    return {"token": create_token(user), "user": user}
+
+
+def login(username, password):
+    row = db.one("SELECT * FROM users WHERE username = ?", ((username or "").strip().lower(),))
+    if not row or not verify_password(password or "", row["password_hash"]):
+        raise ServiceError(401, "Sai tên đăng nhập hoặc mật khẩu")
+    user = get_user(row["id"])
+    return {"token": create_token(user), "user": user}
+
+
+def check_session_access(user, session_id):
+    """Gia sư chỉ đụng được phiên của mình; quản lý xem được mọi phiên."""
+    s = _session(session_id)
+    if user["role"] != "manager" and s["tutor_id"] != user["id"]:
+        raise ServiceError(403, "Đây không phải buổi luyện của bạn")
+    return s
+
+
 # ======================= PHÂN HỆ 1: GIA SƯ =======================
 def list_tutors():
-    return db.q("SELECT id, name FROM tutors ORDER BY id")
+    return db.q("SELECT id, name FROM users WHERE role = 'tutor' ORDER BY id")
 
 
 def _tutor(tutor_id):
-    t = db.one("SELECT id, name FROM tutors WHERE id = ?", (tutor_id,))
+    t = db.one("SELECT id, name FROM users WHERE id = ? AND role = 'tutor'", (tutor_id,))
     if not t:
         raise ServiceError(404, "Không tìm thấy gia sư")
     return t
@@ -226,7 +273,7 @@ PREDICT_NOTE = "Ước lượng điểm môn Toán (chỉ 2 chuyên đề Hàm s
 
 
 def list_students():
-    return db.q("SELECT id, name FROM students ORDER BY id")
+    return db.q("SELECT id, name FROM users WHERE role = 'student' ORDER BY id")
 
 
 def list_exams():
@@ -242,7 +289,7 @@ def get_exam(exam_id):
 
 
 def submit_attempt(student_id, exam_id, answers, time_spent_sec):
-    if not db.one("SELECT 1 AS x FROM students WHERE id = ?", (student_id,)):
+    if not db.one("SELECT 1 AS x FROM users WHERE id = ? AND role = 'student'", (student_id,)):
         raise ServiceError(404, "Không tìm thấy học sinh")
     e = exam_service.EXAMS.get(exam_id)
     if not e:

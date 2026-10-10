@@ -5,11 +5,28 @@ import EXAMS_MOCK from "./exams-mock.json"; // dữ liệu đề giả, sinh t�
 const USE_MOCK = import.meta.env?.VITE_USE_MOCK === "1";
 const API_URL = import.meta.env?.VITE_API_URL || "http://localhost:8000";
 
+// ---------------- TOKEN ĐĂNG NHẬP ----------------
+// Lưu trong localStorage của trình duyệt (bọc try/catch vì có trình duyệt chặn).
+const TOKEN_KEY = "tutorsim_token";
+let token = null;
+try { token = localStorage.getItem(TOKEN_KEY); } catch { /* chế độ ẩn danh */ }
+let onUnauthorized = () => {};
+export function setOnUnauthorized(fn) { onUnauthorized = fn; }
+export function hasToken() { return !!token; }
+function saveToken(t) {
+  token = t;
+  try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch { /* bỏ qua */ }
+}
+export function logout() { saveToken(null); }
+
 async function request(path, options = {}) {
-  const res = await fetch(`${API_URL}${path}`, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
+  const headers = { "Content-Type": "application/json" };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(`${API_URL}${path}`, { headers, ...options });
+  if (res.status === 401 && !path.startsWith("/api/auth/")) {
+    saveToken(null);
+    onUnauthorized();
+  }
   if (!res.ok) {
     let detail = "";
     try { detail = (await res.json()).detail; } catch { /* không có JSON */ }
@@ -55,6 +72,48 @@ const mock = {
 };
 
 // ---------------- CÁC HÀM GỌI API ----------------
+// ---------------- TÀI KHOẢN ----------------
+const MOCK_USERS = {
+  minh: { id: 1, username: "minh", name: "Minh", role: "tutor" },
+  ha: { id: 1, username: "ha", name: "Hà", role: "student" },
+  quanly: { id: 9, username: "quanly", name: "Quản lý trung tâm", role: "manager" },
+};
+let mockMe = null;
+
+export async function login(username, password) {
+  if (USE_MOCK) {
+    await wait(200);
+    const u = MOCK_USERS[username.trim().toLowerCase()];
+    if (!u) throw new Error("Chế độ giả: dùng minh, ha hoặc quanly (mật khẩu bất kỳ)");
+    mockMe = u; saveToken("mock"); return { token: "mock", user: u };
+  }
+  const r = await request("/api/auth/login", { method: "POST", body: JSON.stringify({ username, password }) });
+  saveToken(r.token);
+  return r;
+}
+
+export async function register(username, password, name, role) {
+  if (USE_MOCK) {
+    mockMe = { id: 20, username, name, role }; saveToken("mock"); return { token: "mock", user: mockMe };
+  }
+  const r = await request("/api/auth/register", { method: "POST", body: JSON.stringify({ username, password, name, role }) });
+  saveToken(r.token);
+  return r;
+}
+
+export async function getMe() {
+  if (USE_MOCK) {
+    if (!mockMe) throw new Error("Chưa đăng nhập");
+    return mockMe;
+  }
+  return request("/api/auth/me");
+}
+
+export async function getHealth() {
+  if (USE_MOCK) return { allow_register: true };
+  return request("/api/health");
+}
+
 export async function getTutors() {
   if (USE_MOCK) return mock.tutors;
   return request("/api/tutors");
@@ -74,7 +133,7 @@ export async function startSession(tutorId, chuyenDe = "ham_so", misconceptionId
     const { replies, ...rest } = p;
     return { session_id: id, student_name: "Nam", ...rest };
   }
-  return request("/api/sessions", { method: "POST", body: JSON.stringify({ tutor_id: tutorId, chuyen_de: chuyenDe,
+  return request("/api/sessions", { method: "POST", body: JSON.stringify({ chuyen_de: chuyenDe,
     misconception_id: misconceptionId, persona }) });
 }
 
@@ -200,7 +259,7 @@ export async function submitAttempt(studentId, examId, answers, timeSpentSec) {
     mock2.attempts.push(attempt);
     return attempt;
   }
-  return request("/api/attempts", { method: "POST", body: JSON.stringify({ student_id: studentId, exam_id: examId, answers, time_spent_sec: timeSpentSec }) });
+  return request("/api/attempts", { method: "POST", body: JSON.stringify({ exam_id: examId, answers, time_spent_sec: timeSpentSec }) });
 }
 
 export async function getStudentSummary(studentId) {

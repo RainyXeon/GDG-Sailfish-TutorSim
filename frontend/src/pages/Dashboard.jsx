@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import { getDashboard, getMisconceptionInsights } from "../api.js";
 
-export default function Dashboard({ onBack }) {
+export default function Dashboard() {
   const [rows, setRows] = useState(null);
   const [mis, setMis] = useState(null);
   useEffect(() => { getDashboard().then(setRows); getMisconceptionInsights().then(setMis); }, []);
 
   return (
     <section>
-      <button className="link" onClick={onBack}>Quay lại</button>
       <h1 className="title">Bảng theo dõi gia sư</h1>
       <p className="lead">Điểm trung bình theo thang 4, tính từ các buổi luyện với học sinh ảo.</p>
       {!rows && <p className="muted">Đang tải…</p>}
