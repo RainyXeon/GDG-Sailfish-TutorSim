@@ -116,9 +116,11 @@ def add_turn(
 
     result = classify(body.tutor_message, misconception, history_before)
 
-    knowledge = KnowledgeState(len(misconception["dieu_kien_hieu_ra"]))
-    knowledge.satisfied = set(session.satisfied or [])
-    new_state = knowledge.update(result.satisfied)
+    # State machine v2 co trang thai rieng (so luot thuyet phuc, khong di lui) -> phat lai cac luot cu
+    knowledge = KnowledgeState(len(misconception["dieu_kien_hieu_ra"]), **data.PERSONA_RULES.get(session.persona_key, {}))
+    for t in session.turns:
+        knowledge.update(t.satisfied_this_turn or [], gives_away=t.gives_away_answer)
+    new_state = knowledge.update(result.satisfied, gives_away=result.gives_away_answer)
 
     history_with_tutor = history_before + f"\nGia sư: {body.tutor_message}"
     reply = student_reply(

@@ -40,6 +40,13 @@ PERSONAS = {
     "nhanh_nhung_au": "Hiểu nhanh nhưng ẩu, hay gật đầu vội 'em hiểu rồi' rồi lại nói sai ở chi tiết.",
 }
 
+PERSONA_RULES = {
+    "thu_dong": {"extra_turns": 0},
+    "hay_cai": {"extra_turns": 1},        # phản bác thêm ít nhất 1 lần dù đã được giải thích đủ
+    "mat_goc": {"extra_turns": 1},        # cần được giải thích lại hoặc cho thêm ví dụ
+    "nhanh_nhung_au": {"extra_turns": 0},
+}
+
 RUBRIC = [
     {"key": "chinh_xac", "ten": "Chính xác chuyên môn", "trong_so": 0.20,
      "muc": {1: "Nói sai kiến thức", 2: "Có chỗ không chính xác", 3: "Đúng nhưng thiếu chặt chẽ", 4: "Hoàn toàn chính xác, chặt chẽ"}},
