@@ -56,6 +56,10 @@ def _call(model, contents, config, retries=None):
         except Exception as e:  # quá tải (429/503), mạng chập chờn... thử lại
             last = e
             msg = str(e)
+            if getattr(config, "thinking_config", None) is not None and "400" in msg and "hink" in msg:
+                _thinking_unsupported.add(model)       # model không hỗ trợ mức suy nghĩ -> gửi lại không có nó
+                config.thinking_config = None
+                continue
             if "404" in msg or "API key not valid" in msg or "PERMISSION_DENIED" in msg:
                 break  # sai tên model / sai key: thử lại cũng vô ích
             if attempt < retries - 1:
@@ -67,23 +71,43 @@ def _no_afc(types):
     return types.AutomaticFunctionCallingConfig(disable=True)
 
 
+_thinking_unsupported = set()  # model không nhận tham số suy nghĩ -> lần sau khỏi gửi
+
+
+def _thinking(types, model, strong=False):
+    """Giảm thời gian "suy nghĩ" của model: việc phân loại, đóng vai không cần nghĩ sâu.
+    Model nào không hỗ trợ thì bỏ qua (xem _call)."""
+    level = settings.thinking_strong if strong else settings.thinking
+    if level in ("", "off", "none") or model in _thinking_unsupported:
+        return None
+    return types.ThinkingConfig(thinking_level=level.upper())
+
+
+def _config(types, model, strong=False, **kw):
+    cfg = types.GenerateContentConfig(**kw)
+    t = _thinking(types, model, strong)
+    if t is not None:
+        cfg.thinking_config = t
+    return cfg
+
+
 def ask_text(prompt, temperature=0.8, fake="[GIẢ] Dạ... em chưa hiểu lắm ạ.", model=None):
     if settings.fake_llm:
         return fake
     from google.genai import types
-    resp = _call(model or settings.model, prompt,
-                 types.GenerateContentConfig(temperature=temperature, automatic_function_calling=_no_afc(types)))
+    model = model or settings.model
+    resp = _call(model, prompt, _config(types, model, temperature=temperature, automatic_function_calling=_no_afc(types)))
     return (resp.text or "").strip()
 
 
-def ask_json(prompt, schema, temperature=0.2, fake=None, model=None):
+def ask_json(prompt, schema, temperature=0.2, fake=None, model=None, strong=False):
     if settings.fake_llm:
         return schema.model_validate(fake)
     from google.genai import types
-    config = types.GenerateContentConfig(
-        temperature=temperature, response_mime_type="application/json", response_schema=schema,
-        automatic_function_calling=_no_afc(types))
-    resp = _call(model or settings.model, prompt, config)
+    model = model or settings.model
+    config = _config(types, model, strong=strong, temperature=temperature, response_mime_type="application/json", response_schema=schema,
+                     automatic_function_calling=_no_afc(types))
+    resp = _call(model, prompt, config)
     if getattr(resp, "parsed", None) is not None:
         return resp.parsed
     return schema.model_validate_json(resp.text)
@@ -93,10 +117,10 @@ def ask_with_tools(prompt, tools, temperature=0.3, model=None, retries=1):
     """Gemini tự quyết định gọi hàm nào (automatic function calling).
     Trả về (văn bản cuối, danh sách lời gọi tool để ghi nhật ký)."""
     from google.genai import types
-    config = types.GenerateContentConfig(
-        temperature=temperature, tools=tools,
-        automatic_function_calling=types.AutomaticFunctionCallingConfig(maximum_remote_calls=4))
-    resp = _call(model or settings.model_strong, prompt, config, retries=retries)
+    model = model or settings.model_strong
+    config = _config(types, model, strong=True, temperature=temperature, tools=tools,
+                     automatic_function_calling=types.AutomaticFunctionCallingConfig(maximum_remote_calls=4))
+    resp = _call(model, prompt, config, retries=retries)
     calls = []
     for c in getattr(resp, "automatic_function_calling_history", None) or []:
         for part in getattr(c, "parts", None) or []:

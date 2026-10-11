@@ -69,6 +69,7 @@ Thử API trên trang `/docs`:
 | `503` có chữ `429` hoặc `RESOURCE_EXHAUSTED` | Hết quota miễn phí | Đợi vài phút, hoặc dùng key của thành viên khác; khi chỉ sửa code thì bật `FAKE_LLM=1` |
 | `503` có chữ `API key not valid` | Sai key | Kiểm tra dòng `GEMINI_API_KEY` không thừa dấu cách, dấu ngoặc kép |
 | `401` "Phiên đăng nhập đã hết hạn" | Server khởi động lại khi chưa đặt `JWT_SECRET` | Đăng nhập lại; đặt `JWT_SECRET` trong `.env` thì hết |
+| `503` có chữ `504 DEADLINE_EXCEEDED` | Model "suy nghĩ" quá lâu | Trong `.env` đặt `GEMINI_THINKING=minimal`, hoặc đổi `GEMINI_MODEL` sang model nhẹ hơn (ví dụ `gemini-flash-lite-latest`), rồi khởi động lại server |
 | CLI báo "Server trả lời quá chậm" | Gemini đang chậm/quá tải | Đợi 1 phút rồi chạy lại. Chọn sẵn lỗi sai và tính cách để bỏ qua bước Coach. Coach quá `COACH_BUDGET_SEC` giây sẽ tự dùng luật dự phòng (CLI hiện `Coach (rule)`) |
 
 ## 4. Thử học sinh ảo bằng CLI (việc quan trọng nhất)

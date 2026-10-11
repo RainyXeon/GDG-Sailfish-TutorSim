@@ -27,9 +27,12 @@ class Settings:
     db_path = os.getenv("DB_PATH") or str(BACKEND_DIR / "tutorsim.sqlite3")
     cors_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",") if o.strip()]
     max_history_turns = int(os.getenv("MAX_HISTORY_TURNS", "12"))  # giới hạn hội thoại gửi lên Gemini
-    llm_timeout_sec = int(os.getenv("LLM_TIMEOUT_SEC", "40"))      # tối đa cho 1 lần gọi Gemini
+    llm_timeout_sec = int(os.getenv("LLM_TIMEOUT_SEC", "90"))      # tối đa cho 1 lần gọi Gemini
+    # Mức "suy nghĩ" của model: minimal | low | medium | high | off (= không gửi, để model tự quyết)
+    thinking = os.getenv("GEMINI_THINKING", "low").strip().lower()
+    thinking_strong = os.getenv("GEMINI_THINKING_STRONG", "medium").strip().lower()
     llm_retries = int(os.getenv("LLM_RETRIES", "2"))               # số lần thử khi Gemini lỗi
-    coach_budget_sec = int(os.getenv("COACH_BUDGET_SEC", "25"))    # Coach chậm hơn mức này -> dùng luật dự phòng
+    coach_budget_sec = int(os.getenv("COACH_BUDGET_SEC", "45"))    # Coach chậm hơn mức này -> dùng luật dự phòng
     # ---- Đăng nhập ----
     jwt_secret = os.getenv("JWT_SECRET", "")
     jwt_expire_days = int(os.getenv("JWT_EXPIRE_DAYS", "7"))
