@@ -15,7 +15,7 @@ CÂU MỚI NHẤT CỦA GIA SƯ:
 Quy tắc chấm điều kiện:
 - Chỉ tính điều kiện được thỏa bởi CÂU MỚI NHẤT (dựa vào ngữ cảnh hội thoại để hiểu câu đó).
 - Một điều kiện được thỏa khi nội dung của nó được giải thích ĐÚNG, hoặc gia sư đặt câu hỏi dẫn dắt hướng thẳng vào nội dung đó.
-- Nói SAI kiến thức, nói mơ hồ ("em xem lại đi", "sai rồi"), hoặc chỉ khen chê chung chung: KHÔNG thỏa điều kiện nào.
+- Nói SAI kiến thức, nói mơ hồ ("em xem lại đi", "sai rồi"), chỉ khen chê chung chung, hoặc mắng chửi, xúc phạm học sinh: KHÔNG thỏa điều kiện nào.
 - Khắt khe: khi phân vân thì coi là CHƯA thỏa.
 - gives_away_answer = true nếu gia sư nói thẳng toàn bộ lời giải/đáp án đúng thay vì dẫn dắt.
 - reason: 1 câu ngắn giải thích quyết định.

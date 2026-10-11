@@ -9,3 +9,5 @@ Mỗi lần sửa prompt (`backend/agent/prompts/`) hoặc luật (`state_machin
 | 2026-10-10 | Claude | prompts/simulator.md | Chỉ đưa cách thể hiện của đúng tính cách đang dùng; thêm phản ứng gợi ý từ thư viện lỗi | Nam "hay cãi" trả lời quá ngoan |
 | 2026-10-10 | Claude | prompts/classifier.md | Trích thêm phát biểu toán để SymPy kiểm tra (gộp vào cùng 1 lần gọi) | Tiêu chí "chính xác" trước đây chỉ dựa vào LLM |
 | 2026-10-10 | Claude | llm.py | Tắt cảnh báo function calling của SDK | Cảnh báo tiếng Anh in giữa hội thoại |
+| 2026-10-11 | Claude (theo phản hồi của lead) | prompts/simulator.md, classifier.md | Thêm cách Nam phản ứng khi gia sư mắng chửi; mắng chửi không thỏa điều kiện nào | Gia sư thử "mày ngu vãi", Gemini nghĩ quá lâu rồi lỗi 504 |
+| 2026-10-11 | Claude | settings.py | Model nhẹ (flash-lite) cho chat, model mạnh cho chấm điểm; mức suy nghĩ minimal | Mỗi lượt chat mất 15–30 giây |

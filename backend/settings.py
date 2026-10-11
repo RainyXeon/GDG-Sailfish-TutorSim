@@ -19,17 +19,17 @@ def _flag(name, default="0"):
 
 class Settings:
     gemini_api_key = os.getenv("GEMINI_API_KEY", "")
-    model = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
-    model_strong = os.getenv("GEMINI_MODEL_STRONG") or os.getenv("GEMINI_MODEL", "gemini-flash-latest")
+    model = os.getenv("GEMINI_MODEL", "gemini-flash-lite-latest")
+    model_strong = os.getenv("GEMINI_MODEL_STRONG", "gemini-flash-latest")
     fake_llm = _flag("FAKE_LLM")
     debug = _flag("DEBUG", "1")
     only_approved = _flag("ONLY_APPROVED")
     db_path = os.getenv("DB_PATH") or str(BACKEND_DIR / "tutorsim.sqlite3")
     cors_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",") if o.strip()]
     max_history_turns = int(os.getenv("MAX_HISTORY_TURNS", "12"))  # giới hạn hội thoại gửi lên Gemini
-    llm_timeout_sec = int(os.getenv("LLM_TIMEOUT_SEC", "90"))      # tối đa cho 1 lần gọi Gemini
+    llm_timeout_sec = int(os.getenv("LLM_TIMEOUT_SEC", "60"))      # tối đa cho 1 lần gọi Gemini
     # Mức "suy nghĩ" của model: minimal | low | medium | high | off (= không gửi, để model tự quyết)
-    thinking = os.getenv("GEMINI_THINKING", "low").strip().lower()
+    thinking = os.getenv("GEMINI_THINKING", "minimal").strip().lower()
     thinking_strong = os.getenv("GEMINI_THINKING_STRONG", "medium").strip().lower()
     llm_retries = int(os.getenv("LLM_RETRIES", "2"))               # số lần thử khi Gemini lỗi
     coach_budget_sec = int(os.getenv("COACH_BUDGET_SEC", "45"))    # Coach chậm hơn mức này -> dùng luật dự phòng

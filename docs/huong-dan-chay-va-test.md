@@ -44,7 +44,7 @@ Mở `backend/.env`, điền:
 | `GEMINI_API_KEY` | Key lấy ở https://aistudio.google.com → Get API key | Có (để Nam trả lời thật). Chưa có thì đặt `FAKE_LLM=1` |
 | `JWT_SECRET` | Chạy `python -c "import secrets; print(secrets.token_hex(32))"` rồi dán kết quả | Nên đặt ngay; bắt buộc khi deploy |
 | `MANAGER_PASSWORD` | Mật khẩu cho tài khoản quản lý `quanly` | Có, nếu muốn xem dashboard |
-| `GEMINI_MODEL` | Tên model trong AI Studio, mặc định `gemini-flash-latest` | Không |
+| `GEMINI_MODEL`, `GEMINI_MODEL_STRONG` | Model cho chat (mặc định `gemini-flash-lite-latest`, nhanh) và cho chấm điểm + Coach (mặc định `gemini-flash-latest`) | Không |
 
 **Không gửi file `.env` cho ai, không commit, không dán key vào chat.** Mỗi thành viên nên dùng key của riêng mình khi thử.
 

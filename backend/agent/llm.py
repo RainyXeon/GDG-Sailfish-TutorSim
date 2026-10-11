@@ -97,7 +97,10 @@ def ask_text(prompt, temperature=0.8, fake="[GIẢ] Dạ... em chưa hiểu lắ
     from google.genai import types
     model = model or settings.model
     resp = _call(model, prompt, _config(types, model, temperature=temperature, automatic_function_calling=_no_afc(types)))
-    return (resp.text or "").strip()
+    try:
+        return (resp.text or "").strip()
+    except Exception:  # bị chặn bởi bộ lọc an toàn -> không có text
+        return ""
 
 
 def ask_json(prompt, schema, temperature=0.2, fake=None, model=None, strong=False):

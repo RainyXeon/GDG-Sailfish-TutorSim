@@ -20,4 +20,6 @@ def student_reply(misconception, persona, state, history_text, student_name="Nam
                          loi_giai_sai=misconception["loi_giai_sai"],
                          phan_ung="; ".join(misconception.get("phan_ung_goi_y") or []) or "(không có)",
                          state_guide=STATE_GUIDE[state], history=history_text)
-    return ask_text(prompt, fake=FAKE[state])
+    reply = ask_text(prompt, fake=FAKE[state])
+    # Gemini có thể trả rỗng (bị bộ lọc an toàn chặn khi gia sư nói lời xúc phạm): Nam im lặng thay vì làm hỏng buổi
+    return reply or "...dạ."
