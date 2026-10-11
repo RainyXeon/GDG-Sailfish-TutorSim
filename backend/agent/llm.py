@@ -36,11 +36,14 @@ def _client_():
         if not settings.gemini_api_key:
             raise LLMError("Thiếu GEMINI_API_KEY trong backend/.env (hoặc đặt FAKE_LLM=1 để chạy thử).")
         from google import genai
-        _client = genai.Client(api_key=settings.gemini_api_key)
+        from google.genai import types
+        _client = genai.Client(api_key=settings.gemini_api_key,
+                               http_options=types.HttpOptions(timeout=settings.llm_timeout_sec * 1000))
     return _client
 
 
-def _call(model, contents, config, retries=3):
+def _call(model, contents, config, retries=None):
+    retries = retries or settings.llm_retries
     last = None
     for attempt in range(retries):
         try:
@@ -52,7 +55,11 @@ def _call(model, contents, config, retries=3):
             raise
         except Exception as e:  # quá tải (429/503), mạng chập chờn... thử lại
             last = e
-            time.sleep(2 * (attempt + 1))
+            msg = str(e)
+            if "404" in msg or "API key not valid" in msg or "PERMISSION_DENIED" in msg:
+                break  # sai tên model / sai key: thử lại cũng vô ích
+            if attempt < retries - 1:
+                time.sleep(2 * (attempt + 1))
     raise LLMError(f"Gemini lỗi sau {retries} lần thử: {last}")
 
 
@@ -82,14 +89,14 @@ def ask_json(prompt, schema, temperature=0.2, fake=None, model=None):
     return schema.model_validate_json(resp.text)
 
 
-def ask_with_tools(prompt, tools, temperature=0.3, model=None):
+def ask_with_tools(prompt, tools, temperature=0.3, model=None, retries=1):
     """Gemini tự quyết định gọi hàm nào (automatic function calling).
     Trả về (văn bản cuối, danh sách lời gọi tool để ghi nhật ký)."""
     from google.genai import types
     config = types.GenerateContentConfig(
         temperature=temperature, tools=tools,
-        automatic_function_calling=types.AutomaticFunctionCallingConfig(maximum_remote_calls=6))
-    resp = _call(model or settings.model_strong, prompt, config)
+        automatic_function_calling=types.AutomaticFunctionCallingConfig(maximum_remote_calls=4))
+    resp = _call(model or settings.model_strong, prompt, config, retries=retries)
     calls = []
     for c in getattr(resp, "automatic_function_calling_history", None) or []:
         for part in getattr(c, "parts", None) or []:

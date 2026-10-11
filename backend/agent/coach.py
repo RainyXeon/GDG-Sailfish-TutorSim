@@ -3,6 +3,8 @@ COACH AGENT - phần "agentic": Gemini TỰ gọi công cụ (xem hồ sơ gia s
 danh sách lựa chọn) rồi quyết định bài luyện tiếp theo, kèm lý do.
 Nếu Gemini lỗi / chọn bậy / đang FAKE_LLM -> dùng luật dự phòng (cùng nguyên tắc), ghi rõ nguồn.
 """
+import concurrent.futures
+
 from .library import MISCONCEPTIONS, PERSONAS, RUBRIC
 from .llm import ask_with_tools, extract_json, load_prompt
 from settings import settings
@@ -60,7 +62,15 @@ def plan_next(tutor_id, chuyen_de, profile, center_top):
 
     try:
         prompt = load_prompt("coach", tutor_id=tutor_id, chuyen_de=chuyen_de)
-        text, calls = ask_with_tools(prompt, [get_tutor_profile, get_center_top_misconceptions, list_options])
+        # Giới hạn tổng thời gian: Coach chậm thì dùng luật dự phòng ngay, không bắt gia sư chờ
+        pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+        fut = pool.submit(ask_with_tools, prompt, [get_tutor_profile, get_center_top_misconceptions, list_options])
+        try:
+            text, calls = fut.result(timeout=settings.coach_budget_sec)
+        except concurrent.futures.TimeoutError:
+            raise TimeoutError(f"Coach Agent chậm hơn {settings.coach_budget_sec} giây")
+        finally:
+            pool.shutdown(wait=False)
         d = extract_json(text)
         m, p = d.get("misconception_id"), d.get("persona")
         if m in MISCONCEPTIONS and MISCONCEPTIONS[m]["chuyen_de"] == chuyen_de and p in PERSONAS:

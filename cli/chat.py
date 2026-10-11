@@ -28,12 +28,20 @@ def call(method, path, body=None):
         headers["Authorization"] = f"Bearer {TOKEN}"
     req = urllib.request.Request(API + path, data=data, method=method, headers=headers)
     try:
-        with urllib.request.urlopen(req, timeout=120) as r:
+        with urllib.request.urlopen(req, timeout=int(os.getenv("CLI_TIMEOUT_SEC", "180"))) as r:
             return json.loads(r.read().decode())
-    except urllib.error.HTTPError as e:
+    except urllib.error.HTTPError as e:                 # server trả lỗi (401, 403, 503...)
         detail = e.read().decode()
-        raise SystemExit(f"\nLỗi API {e.code} {path}: {detail}")
-    except urllib.error.URLError:
+        try:
+            detail = json.loads(detail).get("detail", detail)
+        except ValueError:
+            pass
+        raise SystemExit(f"\nLỗi {e.code} khi gọi {path}: {detail}")
+    except (TimeoutError, urllib.error.URLError, OSError) as e:
+        reason = getattr(e, "reason", e)
+        if isinstance(e, TimeoutError) or isinstance(reason, TimeoutError) or "timed out" in str(reason):
+            raise SystemExit("\nServer trả lời quá chậm (Gemini đang chậm hoặc quá tải). Xem cửa sổ backend có báo lỗi không, "
+                             "đợi 1 phút rồi chạy lại. Mẹo: chọn sẵn lỗi sai và tính cách để bỏ qua bước Coach.")
         raise SystemExit(f"\nKhông kết nối được {API}. Đã chạy backend chưa? (cd backend && uvicorn app.main:app --reload)")
 
 
@@ -73,6 +81,8 @@ def main():
     persona = choose("Tính cách của Nam:", [(p["id"], p["ten"]) for p in personas], allow_skip=True)
     intent = choose("Lần này bạn định giảng TỐT hay cố tình giảng KÉM/SAI?", [("tot", "tốt"), ("kem", "kém / sai")])
 
+    if not mid or not persona:
+        print("\nCoach Agent đang chọn bài (có thể mất 10–25 giây)...")
     s = call("POST", "/api/sessions", {"chuyen_de": cd, "misconception_id": mid, "persona": persona})
     sid = s["session_id"]
     dbg = call("GET", f"/api/sessions/{sid}/debug") if health["debug"] else {}
@@ -94,6 +104,7 @@ def main():
             break
         if not text:
             continue
+        print("   (Nam đang nghĩ...)")
         r = call("POST", f"/api/sessions/{sid}/messages", {"content": text})
         print(f"{s['student_name']}: {r['student_reply']}")
         for w in r["math_warnings"]:
@@ -106,7 +117,7 @@ def main():
         if r["status"] == "student_understood":
             print("   (Nam đã hiểu ra. Gõ q để kết thúc và xem nhận xét.)\n")
 
-    print("\nĐang chấm điểm...")
+    print("\nĐang chấm điểm và chọn buổi tiếp theo (có thể mất 20–40 giây)...")
     call("POST", f"/api/sessions/{sid}/finish")
     rep = call("GET", f"/api/reports/{sid}")
     print(json.dumps(rep, ensure_ascii=False, indent=2))
