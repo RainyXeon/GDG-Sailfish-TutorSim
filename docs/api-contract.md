@@ -1,4 +1,6 @@
-# Hợp đồng API – TutorSim (v1.4)
+# Hợp đồng API – TutorSim (v1.5)
+
+> v1.5: chỉ đổi cấu trúc code bên trong (modular monolith). **Đường dẫn, dữ liệu gửi/nhận, phân quyền giữ nguyên v1.4**, frontend và CLI không phải sửa.
 
 - Mọi địa chỉ bắt đầu bằng `/api`, dữ liệu gửi/nhận là JSON. Chạy local: `http://localhost:8000`, thử API: `/docs`.
 - Lỗi trả về `{"detail": "lời giải thích"}` với mã 400 (dữ liệu sai), 404 (không có), 409 (phiên đã kết thúc), 503 (Gemini lỗi).

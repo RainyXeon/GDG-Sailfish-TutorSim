@@ -1,7 +1,9 @@
 """Tài khoản, mật khẩu, JWT."""
+import app.main  # noqa: F401  (nạp đủ các module + bảng)
 import pytest
-from app import services as S
-from app.security import create_token, decode_token, hash_password, verify_password
+from app.core.errors import ServiceError
+from app.modules import auth
+from app.core.security import create_token, decode_token, hash_password, verify_password
 
 
 def test_bam_mat_khau():
@@ -21,12 +23,12 @@ def test_token():
 
 
 def test_dang_ky_dang_nhap():
-    r = S.register("Gia_Su.Moi", "12345678", "Gia sư mới", "tutor")
+    r = auth.register("Gia_Su.Moi", "12345678", "Gia sư mới", "tutor")
     assert r["user"]["username"] == "gia_su.moi" and r["user"]["role"] == "tutor"
     assert "password_hash" not in r["user"]
-    assert S.login("gia_su.moi", "12345678")["user"]["id"] == r["user"]["id"]
-    with pytest.raises(S.ServiceError) as e:
-        S.login("gia_su.moi", "sai-mat-khau")
+    assert auth.login("gia_su.moi", "12345678")["user"]["id"] == r["user"]["id"]
+    with pytest.raises(ServiceError) as e:
+        auth.login("gia_su.moi", "sai-mat-khau")
     assert e.value.status == 401
 
 
@@ -38,12 +40,12 @@ def test_dang_ky_dang_nhap():
     (("hople2", "12345678", "Tự phong quản lý", "manager"), 400),
 ])
 def test_dang_ky_sai(args, status):
-    with pytest.raises(S.ServiceError) as e:
-        S.register(*args)
+    with pytest.raises(ServiceError) as e:
+        auth.register(*args)
     assert e.value.status == status
 
 
 def test_tai_khoan_mau_va_quan_ly():
-    assert S.login("minh", "demo1234")["user"]["role"] == "tutor"
-    assert S.login("ha", "demo1234")["user"]["role"] == "student"
-    assert S.login("quanly", "quanly-mat-khau")["user"]["role"] == "manager"
+    assert auth.login("minh", "demo1234")["user"]["role"] == "tutor"
+    assert auth.login("ha", "demo1234")["user"]["role"] == "student"
+    assert auth.login("quanly", "quanly-mat-khau")["user"]["role"] == "manager"

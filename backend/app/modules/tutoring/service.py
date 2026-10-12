@@ -1,144 +1,42 @@
-"""
-NGHIỆP VỤ: nối bộ não (agent/) với database (db.py). API (main.py) chỉ gọi các hàm ở đây.
-Không phụ thuộc FastAPI -> test được bằng Python thường.
-"""
+"""Nghiệp vụ Phân hệ 1 (gia sư luyện với học sinh ảo). Bảng của module: sessions, messages, reports.
+Nối bộ não (agent/) với database. Không phụ thuộc FastAPI -> test được bằng Python thường."""
 import time
 
-from agent import coach, evaluator
+from agent import evaluator
 from agent.classifier import classify
 from agent.library import MISCONCEPTIONS, PERSONAS, RUBRIC_KEYS, topic_label
 from agent.llm import LLMError
 from agent.math_check import verify
 from agent.simulator import student_reply
 from agent.state_machine import DA_HIEU, KnowledgeState
+from app.core import db
+from app.core.errors import ServiceError
+from app.modules.auth import get_user
+from app.modules.coach import plan_next_for
 from settings import settings
 
-from . import db, exam_service
-from .security import create_token, hash_password, verify_password
+db.register_schema("tutoring", """
+CREATE TABLE IF NOT EXISTS sessions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, tutor_id INTEGER NOT NULL, chuyen_de TEXT NOT NULL,
+  misconception_id TEXT NOT NULL, persona TEXT NOT NULL, state_json TEXT NOT NULL,
+  coach_json TEXT, status TEXT NOT NULL DEFAULT 'in_progress', created_at TEXT NOT NULL, finished_at TEXT);
+CREATE TABLE IF NOT EXISTS messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, session_id INTEGER NOT NULL, role TEXT NOT NULL,
+  content TEXT NOT NULL, meta_json TEXT, created_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS reports (
+  session_id INTEGER PRIMARY KEY, scores_json TEXT NOT NULL, total REAL NOT NULL,
+  evidence_json TEXT NOT NULL, feedback TEXT NOT NULL, next_json TEXT, created_at TEXT NOT NULL);
+""")
 
 STUDENT_NAME = "Nam"
 
 
-class ServiceError(Exception):
-    def __init__(self, status, message):
-        super().__init__(message)
-        self.status, self.message = status, message
-
-
-# ======================= TÀI KHOẢN =======================
-USER_FIELDS = "id, username, name, role, created_at"
-USERNAME_RE = __import__("re").compile(r"^[a-z0-9_.]{3,32}$")
-
-
-def get_user(user_id):
-    return db.one(f"SELECT {USER_FIELDS} FROM users WHERE id = ?", (user_id,))
-
-
-def register(username, password, name, role):
-    if not settings.allow_register:
-        raise ServiceError(403, "Đang tắt tự đăng ký. Liên hệ quản lý trung tâm.")
-    username = (username or "").strip().lower()
-    name = (name or "").strip()
-    if role not in ("tutor", "student"):
-        raise ServiceError(400, "Chỉ tự đăng ký được vai gia sư (tutor) hoặc học sinh (student)")
-    if not USERNAME_RE.match(username):
-        raise ServiceError(400, "Tên đăng nhập 3–32 ký tự, chỉ gồm chữ thường không dấu, số, dấu chấm, gạch dưới")
-    if len(password or "") < 8:
-        raise ServiceError(400, "Mật khẩu cần ít nhất 8 ký tự")
-    if not name or len(name) > 60:
-        raise ServiceError(400, "Cần nhập tên hiển thị (tối đa 60 ký tự)")
-    if db.one("SELECT 1 AS x FROM users WHERE username = ?", (username,)):
-        raise ServiceError(409, "Tên đăng nhập đã có người dùng")
-    uid = db.run("INSERT INTO users(username, password_hash, name, role, created_at) VALUES (?,?,?,?,?)",
-                 (username, hash_password(password), name, role, db.now()))
-    user = get_user(uid)
-    return {"token": create_token(user), "user": user}
-
-
-def login(username, password):
-    row = db.one("SELECT * FROM users WHERE username = ?", ((username or "").strip().lower(),))
-    if not row or not verify_password(password or "", row["password_hash"]):
-        raise ServiceError(401, "Sai tên đăng nhập hoặc mật khẩu")
-    user = get_user(row["id"])
-    return {"token": create_token(user), "user": user}
-
-
-def check_session_access(user, session_id):
-    """Gia sư chỉ đụng được phiên của mình; quản lý xem được mọi phiên."""
-    s = _session(session_id)
-    if user["role"] != "manager" and s["tutor_id"] != user["id"]:
-        raise ServiceError(403, "Đây không phải buổi luyện của bạn")
-    return s
-
-
-# ======================= PHÂN HỆ 1: GIA SƯ =======================
-def list_tutors():
-    return db.q("SELECT id, name FROM users WHERE role = 'tutor' ORDER BY id")
-
-
+# ---------- tra cứu ----------
 def _tutor(tutor_id):
-    t = db.one("SELECT id, name FROM users WHERE id = ? AND role = 'tutor'", (tutor_id,))
-    if not t:
+    t = get_user(tutor_id)
+    if not t or t["role"] != "tutor":
         raise ServiceError(404, "Không tìm thấy gia sư")
     return t
-
-
-def tutor_sessions(tutor_id):
-    _tutor(tutor_id)
-    rows = db.q("""SELECT s.id, s.misconception_id, s.created_at, r.total FROM sessions s
-                   JOIN reports r ON r.session_id = s.id WHERE s.tutor_id = ? ORDER BY s.id DESC""", (tutor_id,))
-    return [{"session_id": r["id"], "topic": _topic(r["misconception_id"]), "total": r["total"],
-             "created_at": r["created_at"]} for r in rows]
-
-
-def _topic(mid):
-    m = MISCONCEPTIONS.get(mid)
-    return topic_label(m) if m else mid
-
-
-def tutor_profile(tutor_id, last_n=3):
-    reps = db.q("""SELECT r.scores_json FROM reports r JOIN sessions s ON s.id = r.session_id
-                   WHERE s.tutor_id = ? ORDER BY r.session_id DESC LIMIT ?""", (tutor_id, last_n))
-    scores = [db.loads(r["scores_json"]) for r in reps]
-    avg = {k: round(sum(s[k] for s in scores) / len(scores), 2) for k in RUBRIC_KEYS} if scores else {}
-    practiced = [r["misconception_id"] for r in db.q("SELECT DISTINCT misconception_id FROM sessions WHERE tutor_id = ?", (tutor_id,))]
-    return {"avg_scores": avg, "practiced_misconceptions": practiced,
-            "sessions": db.one("SELECT COUNT(*) AS n FROM reports r JOIN sessions s ON s.id = r.session_id WHERE s.tutor_id = ?",
-                               (tutor_id,))["n"]}
-
-
-def center_top_misconceptions(limit=10):
-    lists = [db.loads(a["results_json"], []) for a in db.q("SELECT results_json FROM attempts")]
-    top = exam_service.top_misconceptions(lists, limit)
-    for t in top:  # tên đầy đủ lấy từ thư viện lỗi sai nếu có
-        if t["id"] in MISCONCEPTIONS:
-            t["name"] = MISCONCEPTIONS[t["id"]]["ten_loi"]
-    return top
-
-
-def start_session(tutor_id, chuyen_de="ham_so", misconception_id=None, persona=None):
-    _tutor(tutor_id)
-    if chuyen_de not in ("ham_so", "oxyz"):
-        raise ServiceError(400, "chuyen_de phải là ham_so hoặc oxyz")
-    if misconception_id and misconception_id not in MISCONCEPTIONS:
-        raise ServiceError(400, f"Không có lỗi sai {misconception_id}")
-    if persona and persona not in PERSONAS:
-        raise ServiceError(400, f"Không có tính cách {persona}")
-    plan = None
-    if not misconception_id or not persona:
-        plan = coach.plan_next(tutor_id, chuyen_de, tutor_profile(tutor_id), center_top_misconceptions())
-        chosen = [f"lỗi {misconception_id}" if misconception_id else "", f"tính cách {persona}" if persona else ""]
-        if any(chosen):
-            plan["user_override"] = "Người thử tự chọn " + ", ".join(c for c in chosen if c) + "; Coach chỉ chọn phần còn lại."
-        misconception_id = misconception_id or plan["misconception_id"]
-        persona = persona or plan["persona"]
-    m = MISCONCEPTIONS[misconception_id]
-    state = KnowledgeState(len(m["dieu_kien_hieu_ra"]), extra_turns=PERSONAS[persona]["extra_turns"])
-    sid = db.run("""INSERT INTO sessions(tutor_id, chuyen_de, misconception_id, persona, state_json, coach_json, created_at)
-                    VALUES (?,?,?,?,?,?,?)""", (tutor_id, m["chuyen_de"], misconception_id, persona,
-                                                db.dumps(state.to_dict()), db.dumps(plan), db.now()))
-    return {"session_id": sid, "student_name": STUDENT_NAME, "topic": topic_label(m), "problem": m["bai_toan"],
-            "student_solution": m["loi_giai_sai"], "geogebra_commands": m["geogebra"]}
 
 
 def _session(session_id):
@@ -152,6 +50,11 @@ def _messages(session_id):
     return db.q("SELECT role, content, meta_json, created_at FROM messages WHERE session_id = ? ORDER BY id", (session_id,))
 
 
+def _topic(mid):
+    m = MISCONCEPTIONS.get(mid)
+    return topic_label(m) if m else mid
+
+
 def _history(m, msgs, limit_turns=None):
     lines = [f"{STUDENT_NAME}: (nộp bài) {m['loi_giai_sai']}"]
     keep = msgs[-(limit_turns * 2):] if limit_turns else msgs
@@ -160,6 +63,68 @@ def _history(m, msgs, limit_turns=None):
     for x in keep:
         lines.append(f"{'Gia sư' if x['role'] == 'tutor' else STUDENT_NAME}: {x['content']}")
     return "\n".join(lines)
+
+
+def check_session_access(user, session_id):
+    """Gia sư chỉ đụng được phiên của mình; quản lý xem được mọi phiên."""
+    s = _session(session_id)
+    if user["role"] != "manager" and s["tutor_id"] != user["id"]:
+        raise ServiceError(403, "Đây không phải buổi luyện của bạn")
+    return s
+
+
+# ---------- hồ sơ gia sư ----------
+def tutor_sessions(tutor_id):
+    _tutor(tutor_id)
+    rows = db.q("""SELECT s.id, s.misconception_id, s.created_at, r.total FROM sessions s
+                   JOIN reports r ON r.session_id = s.id WHERE s.tutor_id = ? ORDER BY s.id DESC""", (tutor_id,))
+    return [{"session_id": r["id"], "topic": _topic(r["misconception_id"]), "total": r["total"],
+             "created_at": r["created_at"]} for r in rows]
+
+
+def tutor_profile(tutor_id, last_n=3):
+    reps = db.q("""SELECT r.scores_json FROM reports r JOIN sessions s ON s.id = r.session_id
+                   WHERE s.tutor_id = ? ORDER BY r.session_id DESC LIMIT ?""", (tutor_id, last_n))
+    scores = [db.loads(r["scores_json"]) for r in reps]
+    avg = {k: round(sum(s[k] for s in scores) / len(scores), 2) for k in RUBRIC_KEYS} if scores else {}
+    practiced = [r["misconception_id"] for r in db.q("SELECT DISTINCT misconception_id FROM sessions WHERE tutor_id = ?", (tutor_id,))]
+    return {"avg_scores": avg, "practiced_misconceptions": practiced,
+            "sessions": db.one("SELECT COUNT(*) AS n FROM reports r JOIN sessions s ON s.id = r.session_id WHERE s.tutor_id = ?",
+                               (tutor_id,))["n"]}
+
+
+def tutor_stats(tutor_id):
+    """Cho Dashboard: số buổi đã chấm, điểm trung bình, ngày gần nhất."""
+    reps = db.q("""SELECT r.total, r.created_at FROM reports r JOIN sessions s ON s.id = r.session_id
+                   WHERE s.tutor_id = ? ORDER BY r.session_id""", (tutor_id,))
+    avg = round(sum(r["total"] for r in reps) / len(reps), 1) if reps else None
+    return {"sessions_count": len(reps), "avg_total": avg, "last_session": reps[-1]["created_at"][:10] if reps else None}
+
+
+# ---------- một buổi luyện ----------
+def start_session(tutor_id, chuyen_de="ham_so", misconception_id=None, persona=None):
+    _tutor(tutor_id)
+    if chuyen_de not in ("ham_so", "oxyz"):
+        raise ServiceError(400, "chuyen_de phải là ham_so hoặc oxyz")
+    if misconception_id and misconception_id not in MISCONCEPTIONS:
+        raise ServiceError(400, f"Không có lỗi sai {misconception_id}")
+    if persona and persona not in PERSONAS:
+        raise ServiceError(400, f"Không có tính cách {persona}")
+    plan = None
+    if not misconception_id or not persona:
+        plan = plan_next_for(tutor_id, chuyen_de, tutor_profile(tutor_id))
+        chosen = [f"lỗi {misconception_id}" if misconception_id else "", f"tính cách {persona}" if persona else ""]
+        if any(chosen):
+            plan["user_override"] = "Người thử tự chọn " + ", ".join(c for c in chosen if c) + "; Coach chỉ chọn phần còn lại."
+        misconception_id = misconception_id or plan["misconception_id"]
+        persona = persona or plan["persona"]
+    m = MISCONCEPTIONS[misconception_id]
+    state = KnowledgeState(len(m["dieu_kien_hieu_ra"]), extra_turns=PERSONAS[persona]["extra_turns"])
+    sid = db.run("""INSERT INTO sessions(tutor_id, chuyen_de, misconception_id, persona, state_json, coach_json, created_at)
+                    VALUES (?,?,?,?,?,?,?)""", (tutor_id, m["chuyen_de"], misconception_id, persona,
+                                                db.dumps(state.to_dict()), db.dumps(plan), db.now()))
+    return {"session_id": sid, "student_name": STUDENT_NAME, "topic": topic_label(m), "problem": m["bai_toan"],
+            "student_solution": m["loi_giai_sai"], "geogebra_commands": m["geogebra"]}
 
 
 def send_message(session_id, content):
@@ -176,12 +141,11 @@ def send_message(session_id, content):
     history = _history(m, msgs, settings.max_history_turns)
     t0 = time.time()
     try:
-        c = classify(content, m, history)
-        math_ok, warnings = verify(c.math_claims)
+        c = classify(content, m, history)                      # LLM: gia sư đã đáp ứng điều kiện nào?
+        math_ok, warnings = verify(c.math_claims)              # SymPy: gia sư nói toán có đúng không?
         before = state.state
-        new_state = state.update(c.satisfied, tutor_math_ok=math_ok, gives_away=c.gives_away_answer)
-        history_now = history + f"\nGia sư: {content}"
-        reply = student_reply(m, persona, new_state, history_now, STUDENT_NAME)
+        new_state = state.update(c.satisfied, tutor_math_ok=math_ok, gives_away=c.gives_away_answer)  # code quyết định
+        reply = student_reply(m, persona, new_state, history + f"\nGia sư: {content}", STUDENT_NAME)  # LLM: Nam trả lời
     except LLMError as e:
         raise ServiceError(503, f"Học sinh ảo tạm thời không trả lời được: {e}")
     meta = {"satisfied_this_turn": c.satisfied, "gives_away": c.gives_away_answer, "reason": c.reason,
@@ -215,7 +179,7 @@ def finish_session(session_id):
     db.run("UPDATE sessions SET status = 'finished', finished_at = ? WHERE id = ?", (db.now(), session_id))
     db.run("""INSERT INTO reports(session_id, scores_json, total, evidence_json, feedback, created_at)
               VALUES (?,?,?,?,?,?)""", (session_id, db.dumps(scores), total, db.dumps(evidence), feedback, db.now()))
-    nxt = coach.plan_next(s["tutor_id"], s["chuyen_de"], tutor_profile(s["tutor_id"]), center_top_misconceptions())
+    nxt = plan_next_for(s["tutor_id"], s["chuyen_de"], tutor_profile(s["tutor_id"]))
     db.run("UPDATE reports SET next_json = ? WHERE session_id = ?", (db.dumps(nxt), session_id))
     return {"report_id": session_id}
 
@@ -236,17 +200,6 @@ def get_report(report_id):
             "next_persona": nxt.get("persona")}
 
 
-def dashboard():
-    rows = []
-    for t in list_tutors():
-        reps = db.q("""SELECT r.total, r.created_at FROM reports r JOIN sessions s ON s.id = r.session_id
-                       WHERE s.tutor_id = ? ORDER BY r.session_id""", (t["id"],))
-        avg = round(sum(r["total"] for r in reps) / len(reps), 1) if reps else None
-        rows.append({"tutor_id": t["id"], "name": t["name"], "sessions_count": len(reps), "avg_total": avg,
-                     "last_session": reps[-1]["created_at"][:10] if reps else None})
-    return rows
-
-
 def session_debug(session_id):
     """CHỈ cho CLI khi phát triển (DEBUG=1): trạng thái ẩn mà web không được thấy."""
     if not settings.debug:
@@ -258,6 +211,7 @@ def session_debug(session_id):
             "state": db.loads(s["state_json"]), "coach": db.loads(s["coach_json"]), "status": s["status"], "turns": turns}
 
 
+# ---------- thư viện (chỉ đọc) ----------
 def list_misconceptions(chuyen_de=None):
     return [{"id": m["id"], "chuyen_de": m["chuyen_de"], "dang_bai": m["dang_bai"], "ten_loi": m["ten_loi"],
              "trang_thai": m.get("trang_thai", "")} for m in MISCONCEPTIONS.values()
@@ -266,51 +220,3 @@ def list_misconceptions(chuyen_de=None):
 
 def list_personas():
     return [{"id": k, "ten": v["ten"], "mo_ta": v["mo_ta"]} for k, v in PERSONAS.items()]
-
-
-# ======================= PHÂN HỆ 2: HỌC SINH =======================
-PREDICT_NOTE = "Ước lượng điểm môn Toán (chỉ 2 chuyên đề Hàm số, Oxyz) từ các bài luyện gần nhất, không phải cam kết."
-
-
-def list_students():
-    return db.q("SELECT id, name FROM users WHERE role = 'student' ORDER BY id")
-
-
-def list_exams():
-    return [{"id": e["id"], "title": e["title"], "chuyen_de": e["chuyen_de"], "num_questions": len(e["questions"]),
-             "time_limit_min": e["time_limit_min"]} for e in exam_service.EXAMS.values()]
-
-
-def get_exam(exam_id):
-    e = exam_service.EXAMS.get(exam_id)
-    if not e:
-        raise ServiceError(404, "Không tìm thấy đề")
-    return exam_service.public_exam(e)
-
-
-def submit_attempt(student_id, exam_id, answers, time_spent_sec):
-    if not db.one("SELECT 1 AS x FROM users WHERE id = ? AND role = 'student'", (student_id,)):
-        raise ServiceError(404, "Không tìm thấy học sinh")
-    e = exam_service.EXAMS.get(exam_id)
-    if not e:
-        raise ServiceError(404, "Không tìm thấy đề")
-    g = exam_service.grade(e, answers)
-    for r in g["results"]:
-        if r["misconception_id"] in MISCONCEPTIONS:
-            r["misconception_name"] = MISCONCEPTIONS[r["misconception_id"]]["ten_loi"]
-    aid = db.run("""INSERT INTO attempts(student_id, exam_id, exam_title, score10, correct, total, time_spent_sec, results_json, created_at)
-                    VALUES (?,?,?,?,?,?,?,?,?)""", (student_id, exam_id, e["title"], g["score10"], g["correct"], g["total"],
-                                                    int(time_spent_sec), db.dumps(g["results"]), db.now()))
-    return {"attempt_id": aid, "exam_title": e["title"], "time_spent_sec": int(time_spent_sec), **g}
-
-
-def student_summary(student_id):
-    rows = db.q("SELECT * FROM attempts WHERE student_id = ? ORDER BY id", (student_id,))
-    top = exam_service.top_misconceptions([db.loads(r["results_json"], []) for r in rows])
-    for t in top:
-        if t["id"] in MISCONCEPTIONS:
-            t["name"] = MISCONCEPTIONS[t["id"]]["ten_loi"]
-    return {"attempts": [{"attempt_id": r["id"], "exam_title": r["exam_title"], "score10": r["score10"],
-                          "created_at": r["created_at"]} for r in reversed(rows)],
-            "top_misconceptions": top, "prediction": exam_service.predict([r["score10"] for r in rows]),
-            "note": PREDICT_NOTE}

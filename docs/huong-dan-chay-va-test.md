@@ -18,7 +18,7 @@ python -m venv .venv
 pip install -r requirements.txt
 pytest -v
 ```
-**Đạt khi:** dòng cuối báo khoảng `33 passed`. Test tự bật chế độ giả (`FAKE_LLM=1`) và dùng database tạm, nên không tốn quota và không đụng dữ liệu thật.
+**Đạt khi:** dòng cuối báo khoảng `36 passed`. Test tự bật chế độ giả (`FAKE_LLM=1`) và dùng database tạm, nên không tốn quota và không đụng dữ liệu thật.
 
 Các nhóm test:
 
@@ -29,6 +29,7 @@ Các nhóm test:
 | `test_auth.py` | Băm mật khẩu, JWT, đăng ký sai (trùng tên, mật khẩu ngắn, tự phong quản lý), tài khoản mẫu |
 | `test_flow.py` | Một buổi luyện từ đầu đến cuối; Coach ưu tiên lỗi học sinh thật hay mắc; dự đoán điểm; không lộ đáp án |
 | `test_api.py` | Đúng hợp đồng API; chưa đăng nhập bị chặn; gia sư không xem được buổi của người khác; chỉ quản lý xem dashboard |
+| `test_boundaries.py` | Giữ ranh giới module: không import ruột module khác, không đụng bảng của module khác |
 
 Một test lỗi thì đọc dòng `assert` bị đỏ: nó cho biết hành vi nào đã sai. Chưa hiểu thì chụp màn hình gửi Claude.
 
@@ -141,7 +142,7 @@ Môi trường của Claude không gọi được Gemini thật, không cài đ�
 - [ ] `MANAGER_PASSWORD` mạnh, chỉ người phụ trách biết.
 - [ ] `CORS_ORIGINS` = đúng địa chỉ web đã deploy.
 - [ ] Chỉ dùng lỗi sai đã duyệt: `ONLY_APPROVED=1`.
-- [ ] Database: SQLite trên Render miễn phí bị xóa khi khởi động lại. Thí điểm thật thì chuyển `backend/app/db.py` sang Postgres (Supabase), hoặc dùng dịch vụ có ổ đĩa lâu dài.
+- [ ] Database: SQLite trên Render miễn phí bị xóa khi khởi động lại. Thí điểm thật thì chuyển `backend/app/core/db.py` sang Postgres (Supabase), hoặc dùng dịch vụ có ổ đĩa lâu dài.
 
 ## 8. Chưa có (để sau MVP)
 

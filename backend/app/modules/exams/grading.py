@@ -1,4 +1,4 @@
-"""PHÂN HỆ 2 - đề, chấm bài, dự đoán điểm, thống kê lỗi. TOÀN BỘ LÀ CODE THƯỜNG, không dùng LLM."""
+"""Phần TÍNH TOÁN THUẦN của Phân hệ 2: nạp đề, chấm, dự đoán điểm, đếm lỗi. Không đụng database, không dùng LLM."""
 import json
 from statistics import pstdev
 

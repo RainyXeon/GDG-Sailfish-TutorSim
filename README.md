@@ -26,7 +26,9 @@ Gemini chỉ làm việc cần hiểu ngôn ngữ; việc cần chắc chắn (h
 |---|---|
 | `backend/agent/` | Bộ não: `state_machine.py`, `classifier.py`, `math_check.py`, `simulator.py`, `evaluator.py`, `coach.py`, `library.py`, `llm.py` |
 | `backend/agent/prompts/` | Prompt dạng `.md`. **Sửa chữ, không cần biết code**, giữ nguyên biến `$ten_bien`. Sửa xong dùng ngay, không cần khởi động lại |
-| `backend/app/` | API FastAPI + phân quyền (`main.py`), nghiệp vụ (`services.py`), mật khẩu + JWT (`security.py`), lưu trữ SQLite (`db.py`), Phân hệ 2 (`exam_service.py`) |
+| `backend/app/main.py` | Chỉ ghép các module lại thành một API FastAPI |
+| `backend/app/core/` | Dùng chung: database (`db.py`), mật khẩu + JWT (`security.py`), lỗi nghiệp vụ (`errors.py`) |
+| `backend/app/modules/` | Nghiệp vụ, chia module (xem mục **Kiến trúc module** bên dưới) |
 | `backend/tests/` | Test, chạy không cần API key |
 | `data/misconceptions/` | Thư viện 58 lỗi sai (`ham_so.csv`, `oxyz.csv`). Điều kiện hiểu ra cách nhau bằng ` \| ` |
 | `data/exams/` | Đề luyện Phân hệ 2 (JSON) |
@@ -34,6 +36,26 @@ Gemini chỉ làm việc cần hiểu ngôn ngữ; việc cần chắc chắn (h
 | `frontend/` | Web React (Vite): 8 màn hình gia sư, học sinh, quản lý |
 | `scripts/` | Chuyển Excel lỗi sai -> CSV, Excel câu hỏi -> đề JSON |
 | `docs/` | **Hướng dẫn chạy và test** (`huong-dan-chay-va-test.md`), hợp đồng API, nhật ký sửa prompt |
+
+## Kiến trúc module (modular monolith)
+
+Một ứng dụng, một lần chạy (`uvicorn app.main:app`), nhưng nghiệp vụ chia thành các module tách bạch trong `backend/app/modules/`. Mỗi module có cùng khuôn: `__init__.py` (hàm công khai), `service.py` (nghiệp vụ + bảng của module), `router.py` (endpoint), `models.py` (dữ liệu gửi/nhận).
+
+| Module | Làm gì | Bảng sở hữu | Endpoint | Gợi ý người phụ trách |
+|---|---|---|---|---|
+| `auth` | Đăng ký, đăng nhập, JWT, phân quyền theo vai | `users` | `/api/auth/*`, `/api/tutors`, `/api/students` | Tech backend 1 (kèm `core/`) |
+| `tutoring` | Phân hệ 1: buổi luyện với Nam, chấm điểm, báo cáo | `sessions`, `messages`, `reports` | `/api/sessions/*`, `/api/reports/*`, `/api/tutors/{id}/sessions`, `/api/misconceptions`, `/api/personas` | Tech backend 2 + người sửa prompt |
+| `coach` | Chọn bài luyện tiếp theo (Coach Agent + luật dự phòng) | không có | không có (tutoring gọi) | Tech AI |
+| `exams` | Phân hệ 2: đề trắc nghiệm, chấm, mã lỗi, dự đoán điểm | `attempts` | `/api/exams/*`, `/api/attempts`, `/api/students/{id}/summary` | Người làm Phân hệ 2 |
+| `dashboard` | Màn quản lý trung tâm, chỉ đọc từ module khác | không có | `/api/dashboard`, `/api/insights/misconceptions` | Tech frontend/backend bất kỳ |
+
+Bộ não AI (`backend/agent/`) và prompt vẫn để nguyên chỗ cũ; các module gọi vào đó.
+
+**Hai quy tắc** (test `tests/test_boundaries.py` tự kiểm tra, vi phạm là test đỏ):
+1. Module khác chỉ được import hàm công khai: `from app.modules.exams import top_misconceptions_for_center` (đúng), `from app.modules.exams.service import ...` (sai).
+2. Module chỉ đọc/ghi bảng của chính mình. Cần dữ liệu module khác thì gọi hàm công khai của nó (ví dụ dashboard gọi `tutoring.tutor_stats()` chứ không tự `SELECT` bảng `reports`).
+
+Thêm module mới: tạo thư mục theo khuôn trên, khai bảng bằng `db.register_schema(...)`, thêm router vào `app/main.py`, thêm bảng vào danh sách trong `tests/test_boundaries.py`.
 
 ## Chạy trên máy (lần đầu)
 
@@ -93,13 +115,13 @@ pytest                              # không cần key, không tốn quota
 
 - **Thêm/sửa lỗi sai:** sửa Excel rồi chạy `python scripts/xlsx_to_csv.py <file.xlsx>` (giữ nguyên cột `geogebra` đã có), hoặc sửa thẳng CSV. Khởi động lại backend.
 - **Thêm câu trắc nghiệm:** sửa Excel ngân hàng câu hỏi rồi chạy `python scripts/questions_to_exams.py <file.xlsx>` (thêm `--tat-ca` để lấy cả câu chờ duyệt).
-- **Tài khoản mẫu:** `DEMO_USERS` trong `backend/app/db.py`, chỉ tạo khi `SEED_DEMO=1`. Xóa `backend/tutorsim.sqlite3` để làm lại database từ đầu.
+- **Tài khoản mẫu:** `DEMO_USERS` trong `backend/app/modules/auth/service.py`, chỉ tạo khi `SEED_DEMO=1`. Xóa `backend/tutorsim.sqlite3` để làm lại database từ đầu.
 
 ## Đưa lên mạng (gợi ý)
 
 - Backend lên Render: Root Directory `backend`, Build `pip install -r requirements.txt`, Start `uvicorn app.main:app --host 0.0.0.0 --port $PORT`. Khai báo `GEMINI_API_KEY`, `JWT_SECRET`, `MANAGER_PASSWORD`, `DEBUG=0`, `SEED_DEMO=0`, `CORS_ORIGINS=<địa chỉ Vercel>` trong Environment.
 - Frontend lên Vercel: Root Directory `frontend`, biến `VITE_API_URL=<địa chỉ Render>`.
-- Gói miễn phí của Render xóa ổ đĩa mỗi lần khởi động lại, nên SQLite sẽ mất dữ liệu. Đủ cho demo; khi thí điểm thật nên chuyển `app/db.py` sang Postgres (Supabase).
+- Gói miễn phí của Render xóa ổ đĩa mỗi lần khởi động lại, nên SQLite sẽ mất dữ liệu. Đủ cho demo; khi thí điểm thật nên chuyển `app/core/db.py` sang Postgres (Supabase).
 
 ## Quy trình Git
 
