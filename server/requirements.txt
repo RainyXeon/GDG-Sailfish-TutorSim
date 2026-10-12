@@ -1,8 +1,0 @@
-fastapi
-uvicorn[standard]
-sqlalchemy
-pyjwt
-bcrypt
-pydantic
-python-dotenv
-google-genai

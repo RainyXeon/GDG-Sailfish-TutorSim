@@ -1,6 +1,21 @@
+# Bí mật: KHÔNG BAO GIỜ commit
 .env
+*.env.local
+
+# Python
 __pycache__/
-logs/
-.venv
-*.db
-.token
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Database chạy thử ở máy
+*.sqlite3
+
+# Frontend
+node_modules/
+dist/
+
+# Hệ điều hành
+.DS_Store
+Thumbs.db
