@@ -1,0 +1,41 @@
+"""
+TutorSim API (FastAPI) theo kiểu MODULAR MONOLITH: một ứng dụng, chia thành các module độc lập.
+Hợp đồng API: docs/api-contract.md
+Chạy (đứng trong thư mục backend):  uvicorn app.main:app --reload    -> mở http://localhost:8000/docs
+File này CHỈ ghép các module lại; nghiệp vụ nằm trong app/modules/*, bộ não AI nằm trong agent/.
+"""
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, RedirectResponse
+
+from settings import settings
+
+from .core.errors import ServiceError
+from .modules.auth.router import router as auth_router
+from .modules.dashboard.router import router as dashboard_router
+from .modules.exams.router import router as exams_router
+from .modules.tutoring.router import router as tutoring_router
+
+app = FastAPI(title="TutorSim API", version="1.5")
+app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins, allow_methods=["*"], allow_headers=["*"])
+
+
+@app.exception_handler(ServiceError)
+def _service_error(_: Request, e: ServiceError):
+    return JSONResponse(status_code=e.status, content={"detail": e.message})
+
+
+@app.get("/", include_in_schema=False)
+def root():
+    """Mở http://localhost:8000 sẽ tự chuyển sang trang thử API."""
+    return RedirectResponse("/docs")
+
+
+@app.get("/api/health", tags=["Hệ thống"])
+def health():
+    return {"ok": True, "fake_llm": settings.fake_llm, "debug": settings.debug,
+            "has_gemini_key": bool(settings.gemini_api_key), "allow_register": settings.allow_register}
+
+
+for r in (auth_router, tutoring_router, exams_router, dashboard_router):
+    app.include_router(r)
