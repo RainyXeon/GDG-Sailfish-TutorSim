@@ -1,4 +1,4 @@
-# Hướng dẫn chạy, test và những gì team cần tự làm
+# Hướng dẫn chạy, test 
 
 Làm lần lượt từ trên xuống. Mỗi bước có "Đạt khi" để biết đã xong chưa.
 
@@ -7,7 +7,6 @@ Làm lần lượt từ trên xuống. Mỗi bước có "Đạt khi" để bi�
 - Cài **Python 3.12** (python.org, nhớ tick "Add to PATH" trên Windows; 3.11 và 3.13 cũng được) và **Node.js 18+** (nodejs.org).
   Đừng dùng Python 3.14, 3.15: nhiều thư viện chưa có bản cài sẵn, `pip install` sẽ đòi "Microsoft Visual C++ Build Tools" rồi lỗi.
   Máy đã có nhiều bản Python (Windows): tạo môi trường bằng `py -3.12 -m venv .venv` thay cho `python -m venv .venv`.
-- Lấy code: `git clone https://github.com/ntanthedev/GDG-Starie.git`, rồi `git checkout claude/hoan-thien-mvp` (hoặc `main` nếu PR đã được merge).
 
 ## 1. Cài backend và chạy test (không cần API key)
 
@@ -20,20 +19,9 @@ pytest -v
 ```
 **Đạt khi:** dòng cuối báo khoảng `36 passed`. Test tự bật chế độ giả (`FAKE_LLM=1`) và dùng database tạm, nên không tốn quota và không đụng dữ liệu thật.
 
-Các nhóm test:
+Một test lỗi thì đọc dòng `assert` bị đỏ: nó cho biết hành vi nào đã sai.
 
-| File | Kiểm tra gì |
-|---|---|
-| `test_state_machine.py` | Nam không hiểu ngay sau 1 tin; "hay cãi" cần thêm lượt; giải hộ chỉ tính 1 điều kiện; nói sai toán không tiến bộ |
-| `test_math_check.py` | SymPy tính đúng đạo hàm, cực trị, khoảng cách; không phạt khi không đọc được biểu thức |
-| `test_auth.py` | Băm mật khẩu, JWT, đăng ký sai (trùng tên, mật khẩu ngắn, tự phong quản lý), tài khoản mẫu |
-| `test_flow.py` | Một buổi luyện từ đầu đến cuối; Coach ưu tiên lỗi học sinh thật hay mắc; dự đoán điểm; không lộ đáp án |
-| `test_api.py` | Đúng hợp đồng API; chưa đăng nhập bị chặn; gia sư không xem được buổi của người khác; chỉ quản lý xem dashboard |
-| `test_boundaries.py` | Giữ ranh giới module: không import ruột module khác, không đụng bảng của module khác |
-
-Một test lỗi thì đọc dòng `assert` bị đỏ: nó cho biết hành vi nào đã sai. Chưa hiểu thì chụp màn hình gửi Claude.
-
-## 2. Cấu hình `.env` (việc bạn phải tự làm)
+## 2. Cấu hình `.env` 
 
 ```bash
 copy ..\.env.example .env           # Mac/Linux: cp ../.env.example .env
@@ -47,8 +35,6 @@ Mở `backend/.env`, điền:
 | `MANAGER_PASSWORD` | Mật khẩu cho tài khoản quản lý `quanly` | Có, nếu muốn xem dashboard |
 | `GEMINI_MODEL`, `GEMINI_MODEL_STRONG` | Model cho chat (mặc định `gemini-flash-lite-latest`, nhanh) và cho chấm điểm + Coach (mặc định `gemini-flash-latest`) | Không |
 
-**Không gửi file `.env` cho ai, không commit, không dán key vào chat.** Mỗi thành viên nên dùng key của riêng mình khi thử.
-
 ## 3. Chạy backend thật
 
 ```bash
@@ -56,11 +42,6 @@ uvicorn app.main:app --reload
 ```
 Mở http://localhost:8000/docs.
 **Đạt khi:** `GET /api/health` trả `"has_gemini_key": true`.
-
-Thử API trên trang `/docs`:
-1. `POST /api/auth/login` với `{"username": "minh", "password": "demo1234"}` → chép `token`.
-2. Bấm nút **Authorize** (ổ khóa, góc trên) → dán token → Authorize.
-3. Thử `POST /api/sessions` với `{"chuyen_de": "ham_so"}`, rồi `POST /api/sessions/{id}/messages`.
 
 ### Lỗi hay gặp khi chạy thật
 
@@ -73,13 +54,13 @@ Thử API trên trang `/docs`:
 | `503` có chữ `504 DEADLINE_EXCEEDED` | Model "suy nghĩ" quá lâu | Trong `.env` đặt `GEMINI_THINKING=minimal`, hoặc đổi `GEMINI_MODEL` sang model nhẹ hơn (ví dụ `gemini-flash-lite-latest`), rồi khởi động lại server |
 | CLI báo "Server trả lời quá chậm" | Gemini đang chậm/quá tải | Đợi 1 phút rồi chạy lại. Chọn sẵn lỗi sai và tính cách để bỏ qua bước Coach. Coach quá `COACH_BUDGET_SEC` giây sẽ tự dùng luật dự phòng (CLI hiện `Coach (rule)`) |
 
-## 4. Thử học sinh ảo bằng CLI (việc quan trọng nhất)
+## 4. Thử học sinh ảo bằng CLI
 
 Mở terminal thứ hai (backend vẫn chạy), đứng ở thư mục gốc repo:
 ```bash
 python cli/chat.py                  # đăng nhập minh / demo1234
 ```
-Mỗi người làm **5 phiên giảng tốt + 5 phiên cố tình giảng kém**, đổi qua 4 tính cách. CLI hỏi trước "giảng tốt hay kém" để tổng hợp. Ví dụ với lỗi HS-01 (y' = 0 thì kết luận cực trị):
+Làm **5 phiên giảng tốt + 5 phiên cố tình giảng kém**, đổi qua 4 tính cách. CLI hỏi trước "giảng tốt hay kém" để tổng hợp. Ví dụ với lỗi HS-01 (y' = 0 thì kết luận cực trị):
 
 | Loại | Gia sư nói | Nam nên |
 |---|---|---|
@@ -125,27 +106,8 @@ npm run dev                         # mở http://localhost:5173
 
 **Đạt khi:** cả 3 vai đi hết luồng không lỗi, và mở "Hình minh họa (GeoGebra)" thấy đồ thị.
 
-## 6. Những gì Claude chưa kiểm tra được (team kiểm giúp)
-
-Môi trường của Claude không gọi được Gemini thật, không cài được gói từ mạng và không tải được GeoGebra. Cần team xác nhận:
-
-- [ ] `pip install` và `npm install` chạy được trên máy (Windows và Mac).
-- [ ] Gemini thật trả lời đúng định dạng JSON (nếu lỗi, `cli/chat.py` sẽ in nguyên thông báo, gửi Claude).
-- [ ] Coach Agent gọi tool được với model bạn dùng (CLI hiện `Coach (agent)`; nếu luôn là `Coach (rule)` thì Gemini đang lỗi, xem log backend).
-- [ ] GeoGebra hiển thị trên trình duyệt.
-- [ ] Độ trễ mỗi lượt chat (CLI in `... ms`); nếu quá 6–8 giây, thử model nhẹ hơn.
-
-## 7. Trước khi deploy hoặc thí điểm với người ngoài nhóm
-
-- [ ] `JWT_SECRET` là chuỗi ngẫu nhiên dài, khác nhau giữa máy thử và máy thật.
-- [ ] `SEED_DEMO=0` (bỏ tài khoản thử có mật khẩu chung) và `DEBUG=0` (tắt endpoint lộ trạng thái ẩn).
-- [ ] `MANAGER_PASSWORD` mạnh, chỉ người phụ trách biết.
-- [ ] `CORS_ORIGINS` = đúng địa chỉ web đã deploy.
-- [ ] Chỉ dùng lỗi sai đã duyệt: `ONLY_APPROVED=1`.
-- [ ] Database: SQLite trên Render miễn phí bị xóa khi khởi động lại. Thí điểm thật thì chuyển `backend/app/core/db.py` sang Postgres (Supabase), hoặc dùng dịch vụ có ổ đĩa lâu dài.
-
-## 8. Chưa có (để sau MVP)
+## 6. Chưa có (để sau MVP)
 
 - Quên mật khẩu / đổi mật khẩu, khóa tài khoản sau nhiều lần đăng nhập sai.
 - Quản lý tạo tài khoản gia sư hàng loạt, gắn gia sư vào từng trung tâm.
-- Token đang lưu trong `localStorage` của trình duyệt: đủ cho MVP; bản thật nên cân nhắc cookie `HttpOnly`.
+- Token đang lưu trong `localStorage` của trình duyệt: đủ cho MVP.
