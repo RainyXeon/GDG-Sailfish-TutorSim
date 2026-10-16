@@ -37,6 +37,13 @@ Gemini chỉ làm việc cần hiểu ngôn ngữ; việc cần chắc chắn (h
 | `scripts/` | Chuyển Excel lỗi sai -> CSV, Excel câu hỏi -> đề JSON |
 | `docs/` | **Hướng dẫn chạy và test** (`huong-dan-chay-va-test.md`), hợp đồng API, nhật ký sửa prompt |
 
+## Thiết kế giao diện và Frontend
+
+- **Figma:** [TutorSim – UI Screens và Prototype](https://www.figma.com/design/QsuadJi243WJ4oA83m0yKr/TutorSim). Thiết kế có Light Mode và Dark Mode cho Đăng nhập/Đăng ký, Học sinh, Gia sư và Quản lý.
+- **Bản tham chiếu khi triển khai:** `HANDOFF • TutorSim UI v1 • 2026-10-16` trong Figma, gồm 64 màn hình chính (32 Light, 32 Dark). Các thay đổi thiết kế về sau cần được nhóm thống nhất trước khi cập nhật bản bàn giao.
+- **Trạng thái:** Nhóm đã xác nhận Prototype đạt yêu cầu; phía Backend thông báo đã đủ chức năng. Frontend đang ở giai đoạn chuẩn bị triển khai và cần kiểm thử tích hợp với API thực tế.
+- **Quy ước FE:** Dùng Figma Dev Mode để đối chiếu kích thước, màu sắc và component; ưu tiên tái sử dụng giao diện chung, đồng bộ Light/Dark. Vai trò tài khoản do Backend xác thực, không chọn lại sau đăng nhập.
+
 ## Kiến trúc module (modular monolith)
 
 Một ứng dụng, một lần chạy (`uvicorn app.main:app`), nhưng nghiệp vụ chia thành các module tách bạch trong `backend/app/modules/`. Mỗi module có cùng khuôn: `__init__.py` (hàm công khai), `service.py` (nghiệp vụ + bảng của module), `router.py` (endpoint), `models.py` (dữ liệu gửi/nhận).
