@@ -20,7 +20,8 @@ NAMES = {k: v for e in EXAMS.values() for k, v in e.get("misconception_names", {
 def public_exam(exam):
     """Bản đề gửi cho học sinh: KHÔNG có đáp án, mã lỗi, lời giải."""
     return {"id": exam["id"], "title": exam["title"], "time_limit_min": exam["time_limit_min"],
-            "questions": [{"id": q["id"], "content": q["content"], "options": q["options"]} for q in exam["questions"]]}
+            "questions": [{"id": q["id"], "content": q["content"], "options": q["options"], "dang_bai": q.get("dang_bai", ""),
+                           "geogebra_commands": q.get("geogebra", [])} for q in exam["questions"]]}
 
 
 def grade(exam, answers):

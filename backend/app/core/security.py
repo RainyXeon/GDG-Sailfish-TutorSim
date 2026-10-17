@@ -46,3 +46,17 @@ def decode_token(token):
         return int(data["sub"])
     except (jwt.PyJWTError, ValueError, KeyError):
         return None
+
+
+def sign(payload, expires_sec):
+    """Ký một gói dữ liệu ngắn hạn (ví dụ: vé làm bài thi) bằng cùng khóa JWT."""
+    now = datetime.now(timezone.utc)
+    return jwt.encode({**payload, "iat": now, "exp": now + timedelta(seconds=expires_sec)}, settings.jwt_secret, algorithm=ALGO)
+
+
+def unsign(token):
+    """Trả về payload hoặc None nếu sai chữ ký / hết hạn."""
+    try:
+        return jwt.decode(token, settings.jwt_secret, algorithms=[ALGO], options={"require": ["iat", "exp"]})
+    except jwt.PyJWTError:
+        return None

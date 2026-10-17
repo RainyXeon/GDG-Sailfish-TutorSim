@@ -31,8 +31,14 @@ class Settings:
     # Mức "suy nghĩ" của model: minimal | low | medium | high | off (= không gửi, để model tự quyết)
     thinking = os.getenv("GEMINI_THINKING", "minimal").strip().lower()
     thinking_strong = os.getenv("GEMINI_THINKING_STRONG", "medium").strip().lower()
-    llm_retries = int(os.getenv("LLM_RETRIES", "2"))               # số lần thử khi Gemini lỗi
+    llm_retries = int(os.getenv("LLM_RETRIES", "3"))               # số lần thử khi Gemini lỗi
+    # Tổng thời gian tối đa cho 1 lần "hỏi" Gemini, KỂ CẢ thử lại và thời gian chờ. Giữ dưới giới hạn của proxy
+    # đứng trước backend (Render/nginx thường cắt ở 60-100 giây và trả 502/504).
+    llm_call_budget_sec = int(os.getenv("LLM_CALL_BUDGET_SEC", "80"))
+    llm_max_retry_wait_sec = int(os.getenv("LLM_MAX_RETRY_WAIT_SEC", "20"))  # chờ tối đa giữa 2 lần thử (lỗi 429)
     coach_budget_sec = int(os.getenv("COACH_BUDGET_SEC", "45"))    # Coach chậm hơn mức này -> dùng luật dự phòng
+    # Coach chạy NGẦM sau khi chấm xong. Lúc mở báo cáo, chờ Coach tối đa bấy nhiêu giây rồi dùng luật dự phòng
+    coach_wait_in_report_sec = int(os.getenv("COACH_WAIT_IN_REPORT_SEC", "15"))
     # ---- Đăng nhập ----
     jwt_secret = os.getenv("JWT_SECRET", "")
     jwt_expire_days = int(os.getenv("JWT_EXPIRE_DAYS", "7"))

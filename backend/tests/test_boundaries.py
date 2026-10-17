@@ -17,7 +17,7 @@ def test_khong_import_ruot_module_khac():
 
 
 def test_module_khong_dung_bang_cua_module_khac():
-    owners = {"auth": {"users"}, "tutoring": {"sessions", "messages", "reports"}, "exams": {"attempts"}}
+    owners = {"auth": {"users", "password_reset_requests"}, "tutoring": {"sessions", "messages", "reports"}, "exams": {"attempts"}}
     bad = []
     for f in MODULES.rglob("*.py"):
         own = f.relative_to(MODULES).parts[0]

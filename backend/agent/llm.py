@@ -21,7 +21,12 @@ _client = None
 
 
 class LLMError(RuntimeError):
-    pass
+    """Lỗi khi gọi Gemini. kind: quota | overloaded | timeout | auth | bad_output | other.
+    retry_after: số giây nên chờ trước khi thử lại (nếu biết), để API trả header Retry-After."""
+
+    def __init__(self, message, kind="other", retry_after=None):
+        super().__init__(message)
+        self.kind, self.retry_after = kind, retry_after
 
 
 def load_prompt(name, **values):
@@ -42,29 +47,89 @@ def _client_():
     return _client
 
 
-def _call(model, contents, config, retries=None):
+_RETRY_DELAY_RE = re.compile(r"retryDelay['\"]?\s*[:=]\s*['\"]?(\d+(?:\.\d+)?)s")
+
+
+def _status_of(e):
+    """Mã HTTP của lỗi Gemini (429, 503...) hoặc None nếu là lỗi mạng / timeout."""
+    code = getattr(e, "code", None)
+    if isinstance(code, int):
+        return code
+    m = re.match(r"\s*(\d{3})\b", str(e))
+    return int(m.group(1)) if m else None
+
+
+def _classify_error(e):
+    """-> (kind, nên_thử_lại, số_giây_chờ_gợi_ý)."""
+    msg, code = str(e), _status_of(e)
+    if code == 429 or "RESOURCE_EXHAUSTED" in msg:
+        m = _RETRY_DELAY_RE.search(msg)
+        delay = float(m.group(1)) if m else None
+        if "PerDay" in msg or "per day" in msg.lower():
+            return "quota", False, delay           # hết hạn mức trong NGÀY: thử lại vô ích
+        return "quota", True, delay                # hết hạn mức theo PHÚT: chờ rồi thử lại
+    if code in (401, 403, 404) or "API key not valid" in msg or "PERMISSION_DENIED" in msg:
+        return "auth", False, None                 # sai key / sai tên model
+    if code == 400:
+        return "other", False, None
+    if code in (500, 502, 503, 504) or "UNAVAILABLE" in msg or "overloaded" in msg.lower():
+        return "overloaded", True, None
+    if "timed out" in msg.lower() or "timeout" in type(e).__name__.lower():
+        return "timeout", True, None
+    return "other", True, None                     # mạng chập chờn...
+
+
+_FRIENDLY = {
+    "quota": "Gemini đang hết hạn mức gọi (429). Chờ khoảng 1 phút rồi thử lại.",
+    "overloaded": "Máy chủ Gemini đang quá tải.",
+    "timeout": "Gemini trả lời quá lâu.",
+    "auth": "Sai GEMINI_API_KEY hoặc sai tên model.",
+}
+
+
+def _call(model, contents, config, retries=None, budget_sec=None):
+    """Gọi Gemini có thử lại. Tổng thời gian (kể cả lúc chờ) không vượt budget_sec,
+    để request không kéo dài quá giới hạn của proxy (Render, nginx... cắt ở ~60-100 giây -> 502/504)."""
     retries = retries or settings.llm_retries
-    last = None
-    for attempt in range(retries):
+    deadline = time.monotonic() + (budget_sec or settings.llm_call_budget_sec)
+    last, kind, hint, attempt = None, "other", None, 0
+    while attempt < retries:
+        remaining = deadline - time.monotonic()
+        if remaining < 3:
+            kind = "timeout" if last is None else kind
+            break
         try:
+            from google.genai import types
+            # timeout của TỪNG lần gọi không vượt quá thời gian còn lại của cả lượt
+            config.http_options = types.HttpOptions(timeout=int(min(settings.llm_timeout_sec, remaining) * 1000))
             t0 = time.time()
             resp = _client_().models.generate_content(model=model, contents=contents, config=config)
             resp._latency_ms = int((time.time() - t0) * 1000)
             return resp
         except LLMError:
             raise
-        except Exception as e:  # quá tải (429/503), mạng chập chờn... thử lại
+        except Exception as e:
             last = e
             msg = str(e)
             if getattr(config, "thinking_config", None) is not None and "400" in msg and "hink" in msg:
                 _thinking_unsupported.add(model)       # model không hỗ trợ mức suy nghĩ -> gửi lại không có nó
-                config.thinking_config = None
+                config.thinking_config = None          # (không tính là một lần thử)
                 continue
-            if "404" in msg or "API key not valid" in msg or "PERMISSION_DENIED" in msg:
-                break  # sai tên model / sai key: thử lại cũng vô ích
-            if attempt < retries - 1:
-                time.sleep(2 * (attempt + 1))
-    raise LLMError(f"Gemini lỗi sau {retries} lần thử: {last}")
+            kind, retryable, hint = _classify_error(e)
+            attempt += 1
+            if not retryable or attempt >= retries:
+                break
+            wait = hint if hint is not None else 2 * attempt
+            wait = min(wait, settings.llm_max_retry_wait_sec)
+            # còn đủ thời gian cho lần chờ + một lần gọi ngắn nữa thì mới thử lại
+            if time.monotonic() + wait + 5 > deadline:
+                break
+            logging.getLogger("tutorsim.llm").warning("Gemini lỗi (%s), thử lại sau %.0fs: %s", kind, wait, msg[:200])
+            time.sleep(wait)
+    friendly = _FRIENDLY.get(kind, "Gemini lỗi.")
+    detail = str(last)[:300] if last else "hết thời gian cho phép"
+    raise LLMError(f"{friendly} (chi tiết: {detail})", kind=kind,
+                   retry_after=int(hint) + 1 if hint else (60 if kind == "quota" else None))
 
 
 def _no_afc(types):
@@ -91,29 +156,40 @@ def _config(types, model, strong=False, **kw):
     return cfg
 
 
-def ask_text(prompt, temperature=0.8, fake="[GIẢ] Dạ... em chưa hiểu lắm ạ.", model=None):
+def ask_text(prompt, temperature=0.8, fake="[GIẢ] Dạ... em chưa hiểu lắm ạ.", model=None, budget_sec=None):
     if settings.fake_llm:
         return fake
     from google.genai import types
     model = model or settings.model
-    resp = _call(model, prompt, _config(types, model, temperature=temperature, automatic_function_calling=_no_afc(types)))
+    resp = _call(model, prompt, _config(types, model, temperature=temperature, automatic_function_calling=_no_afc(types)),
+                 budget_sec=budget_sec)
     try:
         return (resp.text or "").strip()
     except Exception:  # bị chặn bởi bộ lọc an toàn -> không có text
         return ""
 
 
-def ask_json(prompt, schema, temperature=0.2, fake=None, model=None, strong=False):
+def ask_json(prompt, schema, temperature=0.2, fake=None, model=None, strong=False, budget_sec=None):
     if settings.fake_llm:
         return schema.model_validate(fake)
     from google.genai import types
     model = model or settings.model
     config = _config(types, model, strong=strong, temperature=temperature, response_mime_type="application/json", response_schema=schema,
                      automatic_function_calling=_no_afc(types))
-    resp = _call(model, prompt, config)
-    if getattr(resp, "parsed", None) is not None:
-        return resp.parsed
-    return schema.model_validate_json(resp.text)
+    last = None
+    deadline = time.monotonic() + (budget_sec or settings.llm_call_budget_sec)
+    for _ in range(2):  # Gemini đôi khi trả JSON rỗng / cụt -> hỏi lại 1 lần (trong cùng ngân sách thời gian)
+        left = deadline - time.monotonic()
+        if left < 5:
+            break
+        resp = _call(model, prompt, config, budget_sec=left)
+        if getattr(resp, "parsed", None) is not None:
+            return resp.parsed
+        try:
+            return schema.model_validate_json(resp.text or "")
+        except Exception as e:  # trước đây lỗi này lọt ra ngoài thành HTTP 500
+            last = e
+    raise LLMError(f"Gemini trả về dữ liệu không đúng định dạng: {str(last)[:200]}", kind="bad_output")
 
 
 def ask_with_tools(prompt, tools, temperature=0.3, model=None, retries=1):
@@ -123,7 +199,7 @@ def ask_with_tools(prompt, tools, temperature=0.3, model=None, retries=1):
     model = model or settings.model_strong
     config = _config(types, model, strong=True, temperature=temperature, tools=tools,
                      automatic_function_calling=types.AutomaticFunctionCallingConfig(maximum_remote_calls=4))
-    resp = _call(model, prompt, config, retries=retries)
+    resp = _call(model, prompt, config, retries=retries, budget_sec=settings.coach_budget_sec)
     calls = []
     for c in getattr(resp, "automatic_function_calling_history", None) or []:
         for part in getattr(c, "parts", None) or []:

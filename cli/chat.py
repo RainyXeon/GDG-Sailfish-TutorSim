@@ -81,8 +81,10 @@ def main():
     persona = choose("Tính cách của Nam:", [(p["id"], p["ten"]) for p in personas], allow_skip=True)
     intent = choose("Lần này bạn định giảng TỐT hay cố tình giảng KÉM/SAI?", [("tot", "tốt"), ("kem", "kém / sai")])
 
-    if not mid or not persona:
-        print("\nCoach Agent đang chọn bài (có thể mất 10–25 giây)...")
+    if not mid:
+        print("\nCoach Agent đang chọn lỗi sai (có thể mất 10–25 giây)...")
+    if not persona:
+        print("Không chọn tính cách -> hệ thống chọn ngẫu nhiên.")
     s = call("POST", "/api/sessions", {"chuyen_de": cd, "misconception_id": mid, "persona": persona})
     sid = s["session_id"]
     dbg = call("GET", f"/api/sessions/{sid}/debug") if health["debug"] else {}
@@ -91,7 +93,7 @@ def main():
     print(f"BÀI LÀM CỦA {s['student_name'].upper()}: {s['student_solution']}")
     if dbg:
         print(f"[ẩn] lỗi {dbg['misconception_id']} | tính cách {dbg['persona']}"
-              + (f" | Coach ({dbg['coach']['source']}): {dbg['coach']['reason']}" if dbg.get("coach") else " | bạn tự chọn cả hai"))
+              + (f" | Coach chọn lỗi ({dbg['coach']['source']}): {dbg['coach']['reason']}" if dbg.get("coach") else " | bạn tự chọn lỗi sai"))
         if (dbg.get("coach") or {}).get("user_override"):
             print(f"[ẩn] {dbg['coach']['user_override']}")
         for i, c in enumerate(dbg["conditions"]):

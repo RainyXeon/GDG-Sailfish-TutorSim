@@ -16,13 +16,14 @@ from .modules.dashboard.router import router as dashboard_router
 from .modules.exams.router import router as exams_router
 from .modules.tutoring.router import router as tutoring_router
 
-app = FastAPI(title="TutorSim API", version="1.5")
+app = FastAPI(title="TutorSim API", version="1.7")
 app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins, allow_methods=["*"], allow_headers=["*"])
 
 
 @app.exception_handler(ServiceError)
 def _service_error(_: Request, e: ServiceError):
-    return JSONResponse(status_code=e.status, content={"detail": e.message})
+    headers = {"Retry-After": str(e.retry_after)} if e.retry_after else None
+    return JSONResponse(status_code=e.status, content={"detail": e.message}, headers=headers)
 
 
 @app.get("/", include_in_schema=False)

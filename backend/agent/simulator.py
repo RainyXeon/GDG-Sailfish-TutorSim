@@ -14,12 +14,12 @@ FAKE = {CHUA_NHAN_RA: "[GIẢ] Nhưng em thấy mình làm đúng mà thầy?",
         DA_HIEU: "[GIẢ] À em hiểu rồi ạ, em sai ở chỗ đó!"}
 
 
-def student_reply(misconception, persona, state, history_text, student_name="Nam"):
+def student_reply(misconception, persona, state, history_text, student_name="Nam", budget_sec=None):
     prompt = load_prompt("simulator", student_name=student_name, persona=persona["mo_ta"],
                          persona_behavior=persona["cach_the_hien"], bai_toan=misconception["bai_toan"],
                          loi_giai_sai=misconception["loi_giai_sai"],
                          phan_ung="; ".join(misconception.get("phan_ung_goi_y") or []) or "(không có)",
                          state_guide=STATE_GUIDE[state], history=history_text)
-    reply = ask_text(prompt, fake=FAKE[state])
+    reply = ask_text(prompt, fake=FAKE[state], budget_sec=budget_sec)
     # Gemini có thể trả rỗng (bị bộ lọc an toàn chặn khi gia sư nói lời xúc phạm): Nam im lặng thay vì làm hỏng buổi
     return reply or "...dạ."

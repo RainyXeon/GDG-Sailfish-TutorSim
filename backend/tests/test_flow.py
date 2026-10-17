@@ -38,7 +38,8 @@ def test_coach_tu_chon_va_uu_tien_loi_hoc_sinh_that():
     assert exams.top_misconceptions_for_center()[0]["id"] == "HS-07"
     s = tutoring.start_session(2, "ham_so")                                # gia sư Lan, không chỉ định -> Coach chọn
     dbg = tutoring.session_debug(s["session_id"])
-    assert dbg["misconception_id"] == "HS-07" and dbg["persona"] == "thu_dong"
+    assert dbg["misconception_id"] == "HS-07"                               # Coach chọn lỗi sai
+    assert s["persona_random"] and dbg["persona"] == s["persona"] in tutoring_personas()  # tính cách ngẫu nhiên
     assert dbg["coach"]["source"] == "rule" and dbg["coach"]["reason"]
 
 
@@ -62,3 +63,8 @@ def test_dashboard():
 def test_hoc_sinh_khong_mo_duoc_phien_gia_su():
     with pytest.raises(ServiceError):
         tutoring.start_session(4, "ham_so")
+
+
+def tutoring_personas():
+    from agent.library import PERSONAS
+    return PERSONAS
