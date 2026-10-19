@@ -1,0 +1,8 @@
+<svg overflow="visible" width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Icon clock">
+<rect width="44" height="44" rx="13.2" fill="white"/>
+<path id="ring" d="M32.94 21.12C32.94 27.162 28.042 32.06 22 32.06C15.958 32.06 11.06 27.162 11.06 21.12C11.06 15.078 15.958 10.18 22 10.18C28.042 10.18 32.94 15.078 32.94 21.12Z" fill="white" stroke="#3896FF"/>
+<rect id="hour" x="21.56" y="14.96" width="2" height="7.92" rx="1" fill="#3896FF"/>
+<rect id="min" x="21.56" y="21.56" width="7.04" height="2" rx="1" fill="#3896FF"/>
+</g>
+</svg>

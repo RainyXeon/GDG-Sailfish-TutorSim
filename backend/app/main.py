@@ -7,6 +7,7 @@ File này CHỈ ghép các module lại; nghiệp vụ nằm trong app/modules/*
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 
 from settings import settings
 
@@ -17,7 +18,8 @@ from .modules.exams.router import router as exams_router
 from .modules.tutoring.router import router as tutoring_router
 
 app = FastAPI(title="TutorSim API", version="1.7")
-app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins, allow_methods=["*"], allow_headers=["*"])
+print(settings.cors_origins)
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 
 @app.exception_handler(ServiceError)
@@ -25,11 +27,7 @@ def _service_error(_: Request, e: ServiceError):
     headers = {"Retry-After": str(e.retry_after)} if e.retry_after else None
     return JSONResponse(status_code=e.status, content={"detail": e.message}, headers=headers)
 
-
-@app.get("/", include_in_schema=False)
-def root():
-    """Mở http://localhost:8000 sẽ tự chuyển sang trang thử API."""
-    return RedirectResponse("/docs")
+app.mount("/", StaticFiles(directory="../frontend", html=True), name="static")
 
 
 @app.get("/api/health", tags=["Hệ thống"])
