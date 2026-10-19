@@ -22,7 +22,6 @@ function detailText(detail) {
 }
 
 async function request(path, { method = "GET", body } = {}) {
-  if (!API_URL) throw new ApiError(0, "Chưa cấu hình địa chỉ backend (API_URL trong config.js).");
   const headers = { "Content-Type": "application/json" };
   if (token) headers.Authorization = `Bearer ${token}`;
   let res;

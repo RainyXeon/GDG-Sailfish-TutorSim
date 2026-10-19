@@ -27,9 +27,6 @@ def _service_error(_: Request, e: ServiceError):
     headers = {"Retry-After": str(e.retry_after)} if e.retry_after else None
     return JSONResponse(status_code=e.status, content={"detail": e.message}, headers=headers)
 
-app.mount("/", StaticFiles(directory="../frontend", html=True), name="static")
-
-
 @app.get("/api/health", tags=["Hệ thống"])
 def health():
     return {"ok": True, "fake_llm": settings.fake_llm, "debug": settings.debug,
@@ -38,3 +35,5 @@ def health():
 
 for r in (auth_router, tutoring_router, exams_router, dashboard_router):
     app.include_router(r)
+
+app.mount("/", StaticFiles(directory="../frontend", html=True), name="static")
