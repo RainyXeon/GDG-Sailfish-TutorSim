@@ -182,7 +182,7 @@ a { color: inherit; }
 .card.pad-sm { padding: 20px 24px; }
 .card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .card-head .title-l { flex: 1; }
-.waves { position: absolute; left: -1px; right: -1px; bottom: -1px; height: 90px; pointer-events: none; z-index: 0; }
+.waves { position: absolute; left: -1px; right: -1px; bottom: -1px; height: 90px; pointer-events: none; z-index: -1; }
 .waves::before, .waves::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; background-repeat: no-repeat; background-size: 100% 100%; }
 .waves::before { top: 19%; background-image: var(--wave-1); }
 .waves::after { top: 44%; background-image: var(--wave-2); }
@@ -336,7 +336,7 @@ a { color: inherit; }
 
 /* ---------------- Gia sư: luyện tập ---------------- */
 .problem-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.problem { position: relative; overflow: hidden; background: var(--surface-2); border: 1px solid var(--border-2); border-radius: 12px; padding: 16px 16px 40px; }
+.problem { position: relative; overflow: hidden; background: var(--surface-2); border: 1px solid var(--border-2); border-radius: 12px; padding: 16px 16px 40px; z-index: -2; }
 .problem p { margin: 0; }
 .solution { background: var(--error-bg); border: 1px solid var(--error-border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px; }
 .solution .overline { color: var(--error); }
