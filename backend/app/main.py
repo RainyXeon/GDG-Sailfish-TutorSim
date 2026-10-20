@@ -36,4 +36,4 @@ def health():
 for r in (auth_router, tutoring_router, exams_router, dashboard_router):
     app.include_router(r)
 
-app.mount("/", StaticFiles(directory="../frontend", html=True), name="static")
+app.mount("/", StaticFiles(directory="./frontend", html=True), name="static")
