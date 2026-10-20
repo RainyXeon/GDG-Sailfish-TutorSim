@@ -56,7 +56,7 @@ export async function tutors(main, { params, query, go }) {
   main.innerHTML = `
     ${head("Quản lý gia sư", "Theo dõi danh sách, hoạt động và hiệu suất của từng gia sư.")}
     <div class="mgr-body">
-      <div class="two" style="grid-template-columns:minmax(0,300fr) minmax(0,543fr)">
+      <div class="two">
         <section class="panel" style="padding-bottom:90px">
           <div class="panel-head" style="min-height:0"><div><h2>Danh sách gia sư</h2></div><img src="${IMG}deco-seaweed.svg" alt="" width="40" /></div>
           <form class="search" id="search" role="search">

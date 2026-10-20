@@ -323,3 +323,38 @@ export async function report(main, { params, user, go }) {
     } catch (e) { btn.disabled = false; btn.textContent = "Luyện theo gợi ý"; $("#again-err", main).innerHTML = errorBox(e, ""); }
   });
 }
+
+// ======================= TÀI KHOẢN =======================
+export async function account(main, { user, go }) {
+  const reqs = await api.resetRequests();
+  const opt = (t, s, a) => `<button class="m3card" data-a="${a}"><span class="mono">${t[0]}</span><span class="txt"><b>${t}</b><span>${s}</span></span><span class="ph">${placeholderSvg}</span></button>`;
+  main.innerHTML = `
+    ${head("Cài đặt tài khoản", "Xem thông tin gia sư, các tùy chọn sử dụng TutorSim và yêu cầu đặt lại mật khẩu.")}
+    <div class="mgr-body">
+      <div class="two">
+        ${panel("Thông tin cá nhân", "Quản lý thông tin tài khoản", `<div class="stack" style="gap:16px">
+          ${m3("Vai trò", "Gia sư")}${m3("Tên đăng nhập", user.username)}${m3("Tên hiển thị", user.name)}${m3("Mã tài khoản", user.code)}</div>`,
+          `<img src="${IMG}shark-admin.svg" alt="" width="56" /><img src="${IMG}deco-cloud.svg" alt="" width="56" />`)}
+        ${panel("Tùy chọn sử dụng", "Thiết lập theo nhu cầu", `<div class="stack" style="gap:16px">
+          ${opt("Chế độ giao diện", "Sáng / Tối – bấm để chuyển", "theme")}${opt("Đổi tên hiển thị", "Cập nhật tên hiển thị", "name")}
+          ${opt("Bảo mật tài khoản", "Thay đổi mật khẩu", "pw")}${opt("Phiên đăng nhập", "Đăng xuất an toàn", "logout")}</div>`,
+          `<img src="${IMG}deco-crab.svg" alt="" width="60" />`)}
+      </div>
+    </div>`;
+  $$("[data-a]", main).forEach((b) => b.addEventListener("click", () => {
+    const a = b.dataset.a;
+    if (a === "theme") toggleTheme();
+    if (a === "name") changeName();
+    if (a === "pw") changePassword();
+    if (a === "logout") signOut();
+  }));
+  $$("[data-reset]", main).forEach((b) => b.addEventListener("click", () => formDialog({
+    title: `Đặt mật khẩu mới cho ${b.dataset.name}`, ok: "Đặt mật khẩu",
+    fields: [{ name: "pw", label: "Mật khẩu mới (ít nhất 8 ký tự)", type: "text" }],
+    onSubmit: async ({ pw }) => {
+      if (pw.length < 8) return "Mật khẩu cần ít nhất 8 ký tự.";
+      try { await api.resetPassword(b.dataset.reset, pw); toast("Đã đặt mật khẩu mới. Hãy báo cho người dùng."); go("m/account"); return null; } catch (e) { return e.message; }
+    },
+  })));
+}
+

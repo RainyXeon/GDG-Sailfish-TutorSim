@@ -104,12 +104,13 @@ function shellHtml(user, nav) {
   return `
   <div class="shell">
     <nav class="nav" aria-label="Điều hướng chính">
-      <button class="nav-logo" data-go="${HOME[user.role]}" aria-label="TutorSim – Trang chủ"><img src="${IMG}logo-shark.svg" alt="" /></button>
+      <button id="back_to_home_button" class="nav-logo" data-go="${HOME[user.role]}" aria-label="TutorSim – Trang chủ"><img src="${IMG}logo-shark.svg" alt="" /></button>
       <div class="nav-items">
         ${NAV[user.role].map(([p, label, ic]) => `
           <a class="nav-item" href="#/${p}" ${p === nav ? 'aria-current="page"' : ""}>
             <span class="ic-wrap"><i class="ic ${ic}" aria-hidden="true"></i></span>${label}</a>`).join("")}
       </div>
+      <div class="mobile_bar"></div>
       <button class="nav-avatar" id="avatar-btn" aria-haspopup="dialog" aria-label="Tài khoản của ${esc(user.name)}">
         <img src="${IMG}${AVATAR[user.role]}" alt="" /></button>
     </nav>

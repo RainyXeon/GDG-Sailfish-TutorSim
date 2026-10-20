@@ -590,12 +590,22 @@ button.m3card:hover, a.m3card:hover { filter: brightness(.98); }
   .auth-intro .mascot, .auth-intro .deco-a, .auth-intro .deco-b, .auth-intro .deco-c { display: none; }
 }
 @media (max-width: 760px) {
+  #back_to_home_button { display: none; }
   .shell { padding: 12px 12px 96px; }
-  .nav {
-    position: fixed; left: 8px; right: 8px; bottom: 8px; top: auto; height: 72px; min-height: 0; flex-direction: row; padding: 0 10px;
-    border-radius: 18px; justify-content: space-between;
+  .mobile_bar { height: 100%; border: 1px solid #bebebe; margin-right: 20px; margin-left: 5px; }
+  .nav-avatar {
+    width: unset;
+    height: unset;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    object-fit: cover;
   }
-  .nav-items { flex-direction: row; margin: 0; border: 0; justify-content: center; width: auto; flex: 1; }
+  .nav {
+    scale: 0.9;
+    position: fixed; left: 0; right: 0; bottom: 20px; top: auto; height: 90px; min-height: 0; width: fit-content; flex-direction: row; padding: 15px 20px;
+    border-radius: 18px; margin: 0 auto;
+  }
+  .nav-items { flex-direction: row; margin: 0; border: 0; padding: 0; width: unset; }
   .nav-item { width: 76px; padding: 4px 0; }
   .nav-logo { width: 44px; height: 44px; }
   .menu { left: auto; right: 12px; bottom: 92px; }
@@ -617,4 +627,5 @@ button.m3card:hover, a.m3card:hover { filter: brightness(.98); }
   .headline-l { font-size: 30px; line-height: 36px; }
   .ans-line { grid-template-columns: 1fr; }
 }
+
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
