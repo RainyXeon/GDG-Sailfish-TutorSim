@@ -179,6 +179,7 @@ export async function exam(main, { params, go }) {
     $("#geo-cmd", main).textContent = cmds.length ? cmds.join(" · ") : "Câu hỏi này không yêu cầu hình biểu diễn";
     renderGeoGebra($("#geo", main), cmds, 290);
     paintGrid();
+    MathJax.typesetPromise([main]).catch((err) => console.log("[MathJax / LaTeX] Typeset failed: " + err.message));
   }
   const goto = (k) => { st.i = Math.max(0, Math.min(qs.length - 1, k)); paintQuestion(); };
   $("#qgrid", main).addEventListener("click", (e) => { const b = e.target.closest("[data-k]"); if (b) goto(+b.dataset.k); });

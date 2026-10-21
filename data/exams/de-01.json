@@ -8,184 +8,184 @@
       "id": "Q01",
       "dang_bai": "Cực trị",
       "muc_do": "Thông hiểu",
-      "content": "Hàm số y = x³ + 1 có bao nhiêu điểm cực trị?",
+      "content": "Hàm số $y = x^3 + 1$ có bao nhiêu điểm cực trị?",
       "options": {
-        "A": "0",
-        "B": "1",
-        "C": "2",
-        "D": "3"
+        "A": "$0$",
+        "B": "$1$",
+        "C": "$2$",
+        "D": "$3$"
       },
       "answer": "A",
       "misconceptions": {
         "B": "HS-01"
       },
-      "explanation": "y' = 3x² ≥ 0 và chỉ bằng 0 tại x = 0, y' không đổi dấu nên hàm không có cực trị."
+      "explanation": "$y' = 3x^2 \\ge 0$ và chỉ bằng $0$ tại $x = 0$, $y'$ không đổi dấu nên hàm không có cực trị."
     },
     {
       "id": "Q02",
       "dang_bai": "Cực trị",
       "muc_do": "Thông hiểu",
-      "content": "Hàm số f(x) có đạo hàm f'(x) = x²(x − 2)(x + 1). Số điểm cực trị của f(x) là",
+      "content": "Hàm số $f(x)$ có đạo hàm $f'(x) = x^2(x - 2)(x + 1)$. Số điểm cực trị của $f(x)$ là",
       "options": {
-        "A": "2",
-        "B": "3",
-        "C": "4",
-        "D": "1"
+        "A": "$2$",
+        "B": "$3$",
+        "C": "$4$",
+        "D": "$1$"
       },
       "answer": "A",
       "misconceptions": {
         "B": "HS-07"
       },
-      "explanation": "x = 0 là nghiệm kép nên f' không đổi dấu qua x = 0; f' chỉ đổi dấu tại x = −1 và x = 2."
+      "explanation": "$x = 0$ là nghiệm kép nên $f'$ không đổi dấu qua $x = 0$; $f'$ chỉ đổi dấu tại $x = -1$ và $x = 2$."
     },
     {
       "id": "Q03",
       "dang_bai": "Cực trị",
       "muc_do": "Thông hiểu",
-      "content": "Giá trị cực tiểu của hàm số y = x³ − 3x + 4 là",
+      "content": "Giá trị cực tiểu của hàm số $y = x^3 - 3x + 4$ là",
       "options": {
-        "A": "2",
-        "B": "1",
-        "C": "6",
-        "D": "−1"
+        "A": "$2$",
+        "B": "$1$",
+        "C": "$6$",
+        "D": "$-1$"
       },
       "answer": "A",
       "misconceptions": {
         "B": "HS-08",
         "D": "HS-08"
       },
-      "explanation": "y' = 3x² − 3 = 0 ⇔ x = ±1; y'' (1) = 6 > 0 nên cực tiểu tại x = 1, giá trị cực tiểu y(1) = 2."
+      "explanation": "$y' = 3x^2 - 3 = 0 \\Leftrightarrow x = \\pm 1$; $y''(1) = 6 > 0$ nên cực tiểu tại $x = 1$, giá trị cực tiểu $y(1) = 2$."
     },
     {
       "id": "Q04",
       "dang_bai": "Cực trị",
       "muc_do": "Vận dụng",
-      "content": "Giá trị của m để hàm số y = x³ − 3mx² + 3(m² − 1)x đạt cực tiểu tại x = 1 là",
+      "content": "Giá trị của $m$ để hàm số $y = x^3 - 3mx^2 + 3(m^2 - 1)x$ đạt cực tiểu tại $x = 1$ là",
       "options": {
-        "A": "m = 0",
-        "B": "m = 2",
-        "C": "m = 0 hoặc m = 2",
-        "D": "m = 1"
+        "A": "$m = 0$",
+        "B": "$m = 2$",
+        "C": "$m = 0$ hoặc $m = 2$",
+        "D": "$m = 1$"
       },
       "answer": "A",
       "misconceptions": {
         "C": "HS-10"
       },
-      "explanation": "y'(1) = 0 ⇔ m = 0 hoặc m = 2. Thử lại: y''(1) = 6 − 6m; m = 0 cho y''(1) = 6 > 0 (cực tiểu), m = 2 cho cực đại."
+      "explanation": "$y'(1) = 0 \\Leftrightarrow m = 0$ hoặc $m = 2$. Thử lại: $y''(1) = 6 - 6m$; $m = 0$ cho $y''(1) = 6 > 0$ (cực tiểu), $m = 2$ cho cực đại."
     },
     {
       "id": "Q05",
       "dang_bai": "GTLN–GTNN",
       "muc_do": "Thông hiểu",
-      "content": "Giá trị lớn nhất của hàm số y = x³ − 3x trên đoạn [−2; 3] là",
+      "content": "Giá trị lớn nhất của hàm số $y = x^3 - 3x$ trên đoạn $[-2; 3]$ là",
       "options": {
-        "A": "18",
-        "B": "2",
-        "C": "−2",
-        "D": "0"
+        "A": "$18$",
+        "B": "$2$",
+        "C": "$-2$",
+        "D": "$0$"
       },
       "answer": "A",
       "misconceptions": {
         "B": "HS-12"
       },
-      "explanation": "So sánh y(−2) = −2, y(−1) = 2, y(1) = −2, y(3) = 18. Giá trị lớn nhất là 18 tại đầu mút x = 3."
+      "explanation": "So sánh $y(-2) = -2$, $y(-1) = 2$, $y(1) = -2$, $y(3) = 18$. Giá trị lớn nhất là $18$ tại đầu mút $x = 3$."
     },
     {
       "id": "Q06",
       "dang_bai": "GTLN–GTNN",
       "muc_do": "Thông hiểu",
-      "content": "Giá trị lớn nhất của hàm số y = x³ − 12x trên đoạn [0; 3] là",
+      "content": "Giá trị lớn nhất của hàm số $y = x^3 - 12x$ trên đoạn $[0; 3]$ là",
       "options": {
-        "A": "0",
-        "B": "16",
-        "C": "−9",
-        "D": "−16"
+        "A": "$0$",
+        "B": "$16$",
+        "C": "$-9$",
+        "D": "$-16$"
       },
       "answer": "A",
       "misconceptions": {
         "B": "HS-13"
       },
-      "explanation": "y' = 0 ⇔ x = ±2, chỉ x = 2 thuộc đoạn. y(0) = 0, y(2) = −16, y(3) = −9 nên max = 0."
+      "explanation": "$y' = 0 \\Leftrightarrow x = \\pm 2$, chỉ $x = 2$ thuộc đoạn. $y(0) = 0$, $y(2) = -16$, $y(3) = -9$ nên $\\max = 0$."
     },
     {
       "id": "Q07",
       "dang_bai": "Đơn điệu",
       "muc_do": "Nhận biết",
-      "content": "Khẳng định nào đúng về hàm số y = (2x − 1)/(x + 1)?",
+      "content": "Khẳng định nào đúng về hàm số $y = \\frac{2x - 1}{x + 1}$?",
       "options": {
-        "A": "Đồng biến trên (−∞; −1) và (−1; +∞)",
-        "B": "Đồng biến trên R \\ {−1}",
-        "C": "Đồng biến trên R",
-        "D": "Nghịch biến trên (−∞; −1) và (−1; +∞)"
+        "A": "Đồng biến trên $(-\\infty; -1)$ và $(-1; +\\infty)$",
+        "B": "Đồng biến trên $\\mathbb{R} \\setminus \\{-1\\}$",
+        "C": "Đồng biến trên $\\mathbb{R}$",
+        "D": "Nghịch biến trên $(-\\infty; -1)$ và $(-1; +\\infty)$"
       },
       "answer": "A",
       "misconceptions": {
         "B": "HS-03"
       },
-      "explanation": "y' = 3/(x + 1)² > 0 với mọi x ≠ −1, hàm đồng biến trên từng khoảng xác định, không kết luận trên hợp hai khoảng."
+      "explanation": "$y' = \\frac{3}{(x + 1)^2} > 0$ với mọi $x \\neq -1$, hàm đồng biến trên từng khoảng xác định, không kết luận trên hợp hai khoảng."
     },
     {
       "id": "Q08",
       "dang_bai": "Đơn điệu",
       "muc_do": "Vận dụng",
-      "content": "Tập hợp các giá trị m để hàm số y = x³ − 3x² + mx + 2 đồng biến trên R là",
+      "content": "Tập hợp các giá trị $m$ để hàm số $y = x^3 - 3x^2 + mx + 2$ đồng biến trên $\\mathbb{R}$ là",
       "options": {
-        "A": "m ≥ 3",
-        "B": "m > 3",
-        "C": "m ≤ 3",
-        "D": "m < 3"
+        "A": "$m \\ge 3$",
+        "B": "$m > 3$",
+        "C": "$m \\le 3$",
+        "D": "$m < 3$"
       },
       "answer": "A",
       "misconceptions": {
         "B": "HS-04"
       },
-      "explanation": "Cần y' = 3x² − 6x + m ≥ 0 với mọi x ⇔ Δ' = 9 − 3m ≤ 0 ⇔ m ≥ 3 (m = 3 cho y' = 3(x − 1)² ≥ 0 vẫn đồng biến)."
+      "explanation": "Cần $y' = 3x^2 - 6x + m \\ge 0$ với mọi $x \\Leftrightarrow \\Delta' = 9 - 3m \\le 0 \\Leftrightarrow m \\ge 3$ ($m = 3$ cho $y' = 3(x - 1)^2 \\ge 0$ vẫn đồng biến)."
     },
     {
       "id": "Q09",
       "dang_bai": "Tiệm cận",
       "muc_do": "Thông hiểu",
-      "content": "Đồ thị hàm số y = (x² − 4)/(x² − 3x + 2) có bao nhiêu tiệm cận đứng?",
+      "content": "Đồ thị hàm số $y = \\frac{x^2 - 4}{x^2 - 3x + 2}$ có bao nhiêu tiệm cận đứng?",
       "options": {
-        "A": "1",
-        "B": "2",
-        "C": "0",
-        "D": "3"
+        "A": "$1$",
+        "B": "$2$",
+        "C": "$0$",
+        "D": "$3$"
       },
       "answer": "A",
       "misconceptions": {
         "B": "HS-16"
       },
-      "explanation": "y = (x − 2)(x + 2)/((x − 1)(x − 2)) = (x + 2)/(x − 1) với x ≠ 2; giới hạn tại x = 2 bằng 4 (hữu hạn) nên chỉ có tiệm cận đứng x = 1."
+      "explanation": "$y = \\frac{(x - 2)(x + 2)}{(x - 1)(x - 2)} = \\frac{x + 2}{x - 1}$ với $x \\neq 2$; giới hạn tại $x = 2$ bằng $4$ (hữu hạn) nên chỉ có tiệm cận đứng $x = 1$."
     },
     {
       "id": "Q10",
       "dang_bai": "Tiệm cận",
       "muc_do": "Vận dụng",
-      "content": "Đồ thị hàm số y = (x + 2)/√(x² + 1) có bao nhiêu tiệm cận ngang?",
+      "content": "Đồ thị hàm số $y = \\frac{x + 2}{\\sqrt{x^2 + 1}}$ có bao nhiêu tiệm cận ngang?",
       "options": {
-        "A": "2",
-        "B": "1",
-        "C": "0",
-        "D": "3"
+        "A": "$2$",
+        "B": "$1$",
+        "C": "$0$",
+        "D": "$3$"
       },
       "answer": "A",
       "misconceptions": {
         "B": "HS-17"
       },
-      "explanation": "Khi x → +∞ giới hạn bằng 1, khi x → −∞ giới hạn bằng −1 (vì √(x²) = |x|), nên có 2 tiệm cận ngang y = 1 và y = −1."
+      "explanation": "Khi $x \\to +\\infty$ giới hạn bằng $1$, khi $x \\to -\\infty$ giới hạn bằng $-1$ (vì $\\sqrt{x^2} = |x|$), nên có 2 tiệm cận ngang $y = 1$ và $y = -1$."
     }
   ],
   "misconception_names": {
-    "HS-01": "Cho rằng f'(x0) = 0 thì x0 chắc chắn là cực trị",
-    "HS-07": "Đếm cả nghiệm bội chẵn của f' là cực trị",
+    "HS-01": "Cho rằng $f'(x_0) = 0$ thì $x_0$ chắc chắn là cực trị",
+    "HS-07": "Đếm cả nghiệm bội chẵn của $f'$ là cực trị",
     "HS-08": "Nhầm điểm cực trị với giá trị cực trị",
-    "HS-10": "Không thử lại sau khi giải y'(x0) = 0",
+    "HS-10": "Không thử lại sau khi giải $f'(x_0) = 0$",
     "HS-12": "Quên tính giá trị tại đầu mút đoạn",
     "HS-13": "Tính cả nghiệm nằm ngoài đoạn",
     "HS-03": "Kết luận đơn điệu trên hợp hai khoảng",
-    "HS-04": "Dùng y' > 0 thay vì y' ≥ 0 khi tìm m",
+    "HS-04": "Dùng $y' > 0$ thay vì $y' \\ge 0$ khi tìm $m$",
     "HS-16": "Không rút gọn khi tìm tiệm cận đứng",
-    "HS-17": "Bỏ sót giới hạn khi x → −∞ với hàm chứa căn"
+    "HS-17": "Bỏ sót giới hạn khi $x \\to -\\infty$ với hàm chứa căn"
   }
 }

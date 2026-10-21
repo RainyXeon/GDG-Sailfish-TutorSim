@@ -14,6 +14,23 @@
     // Áp chế độ sáng/tối trước khi vẽ trang để không bị nháy màu
     try { var t = localStorage.getItem("tutorsim_theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
   </script>
+  <!-- Latex rendering -->
+  <script>
+    window.MathJax = {
+      tex: { 
+        inlineMath: [['$', '$'], ['\\(', '\\)']] 
+      },
+      chtml: {
+        displayAlign: 'left',
+        displayIndent: '2em' // Optional: Adds an indent so it's not glued to the very edge
+      },
+      svg: {
+        displayAlign: 'left',
+        displayIndent: '2em' 
+      }
+    };
+  </script>
+  <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
 </head>
 <body>
   <div id="app" aria-live="polite"></div>

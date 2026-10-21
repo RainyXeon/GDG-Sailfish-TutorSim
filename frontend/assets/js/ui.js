@@ -143,4 +143,4 @@ export async function renderGeoGebra(box, commands, height = 320, emptyMsg = "Kh
 }
 
 export const wave = (cls = "") => `<div class="waves ${cls}" aria-hidden="true"></div>`;
-export const deco = (file, style, w = 84) => `<img class="deco" src="${IMG}${file}" alt="" style="width:${w}px;${style}" />`;
+export const deco = (file, style, w = 84) => `<img class="deco mobile_hide_unneccessary" src="${IMG}${file}" alt="" style="width:${w}px;${style}" />`;

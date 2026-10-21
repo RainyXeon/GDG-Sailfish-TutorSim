@@ -590,7 +590,9 @@ button.m3card:hover, a.m3card:hover { filter: brightness(.98); }
   .auth-intro .mascot, .auth-intro .deco-a, .auth-intro .deco-b, .auth-intro .deco-c { display: none; }
 }
 @media (max-width: 760px) {
+  .row { display: grid; }
   #back_to_home_button { display: none; }
+  .mobile_hide_unneccessary { display: none; }
   .shell { padding: 12px 12px 96px; }
   .mobile_bar { height: 100%; border: 1px solid #bebebe; margin-right: 20px; margin-left: 5px; }
   .nav-avatar {

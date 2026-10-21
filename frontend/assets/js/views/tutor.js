@@ -37,7 +37,7 @@ export async function home(main, { user, go }) {
         <p class="body-l muted">Gia sư môn Toán THPT · Mã gia sư: ${esc(user.code)}</p>
         <p class="label-l muted" style="font-weight:400">Chọn chuyên đề và tính cách học sinh ảo để bắt đầu một buổi luyện giảng mới.</p>
       </div>
-      <img src="${IMG}shark-wave.svg" alt="" width="110" height="86" />
+      <img class="mobile_hide_unneccessary" src="${IMG}shark-wave.svg" alt="" width="110" height="86" />
       <div class="stats">
         <div class="stat"><b>${stats.sessions_count}</b><span>Buổi đã luyện</span></div>
         <div class="stat"><b>${stats.avg_total == null ? "–" : fmtScore(stats.avg_total) + "/4"}</b><span>Điểm trung bình</span></div>
@@ -73,7 +73,7 @@ export async function home(main, { user, go }) {
             ${sessions.length > 5 ? `<a class="link label-l" href="#/t/reports">Xem tất cả buổi luyện →</a>` : ""}`
           : `<div class="empty"><div class="pics"><img src="${IMG}shark-hi.svg" alt="" width="110" /><img src="${IMG}deco-bubbles.svg" alt="" width="60" /></div>
               <b>Chưa có buổi luyện nào</b><span>Lịch sử luyện tập, điểm số và thời gian sẽ xuất hiện tại đây sau khi bạn hoàn thành buổi luyện đầu tiên.</span></div>`}
-        <div class="deco-row"><img src="${IMG}deco-bubbles.svg" alt="" width="70" /><img src="${IMG}deco-seaweed.svg" alt="" width="60" /></div>
+        <div class="deco-row mobile_hide_unneccessary"><img src="${IMG}deco-bubbles.svg" alt="" width="70" /><img src="${IMG}deco-seaweed.svg" alt="" width="60" /></div>
         ${wave()}
       </section>
     </div>`;
@@ -157,13 +157,13 @@ export async function practice(main, { params, go }) {
         </form>`}
       </section>
       <section class="card geo-card" id="geocard">
-        <div class="row"><div class="grow"><b class="title-m">Minh họa GeoGebra</b><div class="label-m muted">${esc(s.geogebra_commands.join(" · ") || "Bài này chưa có hình minh họa")}</div></div>
+        <div class="row"><div class="grow"><b class="title-m">Minh họa GeoGebra</b><div class="label-m muted">${esc(s.geogebra_commands ? '\\[' + s.geogebra_commands.join(" · ") + '\\]' : "Bài này chưa có hình minh họa")}</div></div>
           <button class="btn tonal" id="collapse">Thu gọn</button></div>
         <div class="geo-box" id="geo"></div>
         ${wave()}
       </section>
     </div>`;
-
+  MathJax.typesetPromise([main]).catch((err) => console.log("[MathJax / LaTeX] Typeset failed: " + err.message));
   const log = $("#log", main);
   const avatar = (me) => `<span class="avatar" style="width:32px;height:32px"><img src="${IMG}${me ? "shark-tutor.svg" : "shark-nam.svg"}" alt="" /></span>`;
   const bubble = (role, text, warnings = []) => {
@@ -203,6 +203,7 @@ export async function practice(main, { params, go }) {
       $("#typing", main)?.remove();
       if (r.math_warnings?.length) mine.querySelector(".body").insertAdjacentHTML("beforeend", r.math_warnings.map((w) => `<span class="warn">Kiểm tra lại: ${esc(w)}</span>`).join(""));
       log.insertAdjacentHTML("beforeend", bubble("student", r.student_reply));
+      MathJax.typesetPromise([log]).catch((err) => console.log("[MathJax / LaTeX] Typeset failed: " + err.message));
       if (r.status === "student_understood") showUnderstood();
     } catch (e) {
       $("#typing", main)?.remove();

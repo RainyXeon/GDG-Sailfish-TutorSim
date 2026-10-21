@@ -8,116 +8,116 @@
       "id": "Q11",
       "dang_bai": "Khoảng cách",
       "muc_do": "Nhận biết",
-      "content": "Khoảng cách từ A(1; −1; 2) đến mặt phẳng (P): x + 2y − 2z + 4 = 0 bằng",
+      "content": "Khoảng cách từ $A(1; -1; 2)$ đến mặt phẳng $(P): x + 2y - 2z + 4 = 0$ bằng",
       "options": {
-        "A": "1/3",
-        "B": "1",
-        "C": "1/9",
-        "D": "3"
+        "A": "$\\frac{1}{3}$",
+        "B": "$1$",
+        "C": "$\\frac{1}{9}$",
+        "D": "$3$"
       },
       "answer": "A",
       "misconceptions": {
         "B": "OX-01"
       },
-      "explanation": "d = |1 − 2 − 4 + 4| / √(1 + 4 + 4) = 1/3."
+      "explanation": "$d = \\frac{|1 - 2 - 4 + 4|}{\\sqrt{1 + 4 + 4}} = \\frac{1}{3}$."
     },
     {
       "id": "Q12",
       "dang_bai": "Phương trình mặt phẳng",
       "muc_do": "Nhận biết",
-      "content": "Mặt phẳng đi qua A(2; −1; 1) và có vectơ pháp tuyến n = (1; 3; −2) có phương trình",
+      "content": "Mặt phẳng đi qua $A(2; -1; 1)$ và có vectơ pháp tuyến $\\vec{n} = (1; 3; -2)$ có phương trình",
       "options": {
-        "A": "x + 3y − 2z + 3 = 0",
-        "B": "x + 3y − 2z − 3 = 0",
-        "C": "2x − y + z + 3 = 0",
-        "D": "x + 3y − 2z = 0"
+        "A": "$x + 3y - 2z + 3 = 0$",
+        "B": "$x + 3y - 2z - 3 = 0$",
+        "C": "$2x - y + z + 3 = 0$",
+        "D": "$x + 3y - 2z = 0$"
       },
       "answer": "A",
       "misconceptions": {
         "B": "OX-02",
         "C": "OX-06"
       },
-      "explanation": "1(x − 2) + 3(y + 1) − 2(z − 1) = 0 ⇔ x + 3y − 2z + 3 = 0."
+      "explanation": "$1(x - 2) + 3(y + 1) - 2(z - 1) = 0 \\Leftrightarrow x + 3y - 2z + 3 = 0$."
     },
     {
       "id": "Q13",
       "dang_bai": "Phương trình mặt phẳng",
       "muc_do": "Thông hiểu",
-      "content": "Mặt phẳng đi qua M(2; 0; 0), N(0; −1; 0), P(0; 0; 3) có phương trình",
+      "content": "Mặt phẳng đi qua $M(2; 0; 0)$, $N(0; -1; 0)$, $P(0; 0; 3)$ có phương trình",
       "options": {
-        "A": "3x − 6y + 2z − 6 = 0",
-        "B": "2x − y + 3z − 1 = 0",
-        "C": "x/2 + y + z/3 = 1",
-        "D": "3x − 6y + 2z = 0"
+        "A": "$3x - 6y + 2z - 6 = 0$",
+        "B": "$2x - y + 3z - 1 = 0$",
+        "C": "$\\frac{x}{2} + y + \\frac{z}{3} = 1$",
+        "D": "$3x - 6y + 2z = 0$"
       },
       "answer": "A",
       "misconceptions": {
         "B": "OX-03"
       },
-      "explanation": "Phương trình đoạn chắn x/2 + y/(−1) + z/3 = 1, nhân 6 được 3x − 6y + 2z − 6 = 0."
+      "explanation": "Phương trình đoạn chắn $\\frac{x}{2} + \\frac{y}{-1} + \\frac{z}{3} = 1$, nhân 6 được $3x - 6y + 2z - 6 = 0$."
     },
     {
       "id": "Q14",
       "dang_bai": "Góc",
       "muc_do": "Thông hiểu",
-      "content": "Góc giữa hai mặt phẳng (P): x + y − 1 = 0 và (Q): z − y + 3 = 0 bằng",
+      "content": "Góc giữa hai mặt phẳng $(P): x + y - 1 = 0$ và $(Q): z - y + 3 = 0$ bằng",
       "options": {
-        "A": "60°",
-        "B": "120°",
-        "C": "30°",
-        "D": "45°"
+        "A": "$60^\\circ$",
+        "B": "$120^\\circ$",
+        "C": "$30^\\circ$",
+        "D": "$45^\\circ$"
       },
       "answer": "A",
       "misconceptions": {
         "B": "OX-04"
       },
-      "explanation": "n₁ = (1; 1; 0), n₂ = (0; −1; 1); cos = |−1|/(√2.√2) = 1/2 nên góc 60° (góc giữa hai mặt phẳng không vượt quá 90°)."
+      "explanation": "$\\vec{n}_1 = (1; 1; 0)$, $\\vec{n}_2 = (0; -1; 1)$; $\\cos \\varphi = \\frac{|-1|}{\\sqrt{2} \\cdot \\sqrt{2}} = \\frac{1}{2}$ nên góc $60^\\circ$ (góc giữa hai mặt phẳng không vượt quá $90^\\circ$)."
     },
     {
       "id": "Q15",
       "dang_bai": "Khoảng cách",
       "muc_do": "Vận dụng",
-      "content": "Khoảng cách giữa hai mặt phẳng (P): x − 2y + 2z + 1 = 0 và (Q): 2x − 4y + 4z − 7 = 0 bằng",
+      "content": "Khoảng cách giữa hai mặt phẳng $(P): x - 2y + 2z + 1 = 0$ và $(Q): 2x - 4y + 4z - 7 = 0$ bằng",
       "options": {
-        "A": "3/2",
-        "B": "8/3",
-        "C": "2",
-        "D": "1/2"
+        "A": "$\\frac{3}{2}$",
+        "B": "$\\frac{8}{3}$",
+        "C": "$2$",
+        "D": "$\\frac{1}{2}$"
       },
       "answer": "A",
       "misconceptions": {
         "B": "OX-05"
       },
-      "explanation": "Viết (Q): x − 2y + 2z − 7/2 = 0; d = |1 + 7/2| / 3 = 3/2."
+      "explanation": "Viết $(Q): x - 2y + 2z - \\frac{7}{2} = 0$; $d = \\frac{\\left|1 + \\frac{7}{2}\\right|}{3} = \\frac{3}{2}$."
     },
     {
       "id": "Q16",
       "dang_bai": "Đường thẳng",
       "muc_do": "Nhận biết",
-      "content": "Một vectơ chỉ phương của đường thẳng d: (x + 1)/3 = (y − 2)/(−2) = (z − 1)/1 là",
+      "content": "Một vectơ chỉ phương của đường thẳng $d: \\frac{x + 1}{3} = \\frac{y - 2}{-2} = \\frac{z - 1}{1}$ là",
       "options": {
-        "A": "(3; −2; 1)",
-        "B": "(−1; 2; 1)",
-        "C": "(1; −2; −1)",
-        "D": "(3; 2; 1)"
+        "A": "$(3; -2; 1)$",
+        "B": "$(-1; 2; 1)$",
+        "C": "$(1; -2; -1)$",
+        "D": "$(3; 2; 1)$"
       },
       "answer": "A",
       "misconceptions": {
         "B": "OX-06",
         "C": "OX-06"
       },
-      "explanation": "Vectơ chỉ phương là bộ số ở mẫu: (3; −2; 1). Bộ (−1; 2; 1) là tọa độ một điểm thuộc d."
+      "explanation": "Vectơ chỉ phương là bộ số ở mẫu: $(3; -2; 1)$. Bộ $(-1; 2; 1)$ là tọa độ một điểm thuộc $d$."
     },
     {
       "id": "Q17",
       "dang_bai": "Mặt cầu",
       "muc_do": "Thông hiểu",
-      "content": "Mặt cầu x² + y² + z² + 4x − 2y + 6z + 5 = 0 có tâm I và bán kính R là",
+      "content": "Mặt cầu $x^2 + y^2 + z^2 + 4x - 2y + 6z + 5 = 0$ có tâm $I$ và bán kính $R$ là",
       "options": {
-        "A": "I(−2; 1; −3), R = 3",
-        "B": "I(4; −2; 6), R = √51",
-        "C": "I(2; −1; 3), R = 3",
-        "D": "I(−2; 1; −3), R = 9"
+        "A": "$I(-2; 1; -3)$, $R = 3$",
+        "B": "$I(4; -2; 6)$, $R = \\sqrt{51}$",
+        "C": "$I(2; -1; 3)$, $R = 3$",
+        "D": "$I(-2; 1; -3)$, $R = 9$"
       },
       "answer": "A",
       "misconceptions": {
@@ -125,52 +125,52 @@
         "C": "OX-07",
         "D": "OX-26"
       },
-      "explanation": "a = −2, b = 1, c = −3 (chia hệ số cho −2); R² = 4 + 1 + 9 − 5 = 9 nên R = 3."
+      "explanation": "$a = -2, b = 1, c = -3$ (chia hệ số cho $-2$); $R^2 = 4 + 1 + 9 - 5 = 9$ nên $R = 3$."
     },
     {
       "id": "Q18",
       "dang_bai": "Hình chiếu – đối xứng",
       "muc_do": "Vận dụng",
-      "content": "Điểm đối xứng với A(3; 1; 1) qua mặt phẳng (P): x + y + z − 2 = 0 là",
+      "content": "Điểm đối xứng với $A(3; 1; 1)$ qua mặt phẳng $(P): x + y + z - 2 = 0$ là",
       "options": {
-        "A": "(1; −1; −1)",
-        "B": "(2; 0; 0)",
-        "C": "(5; 2; 2)",
-        "D": "(−3; −1; −1)"
+        "A": "$(1; -1; -1)$",
+        "B": "$(2; 0; 0)$",
+        "C": "$(5; 2; 2)$",
+        "D": "$(-3; -1; -1)$"
       },
       "answer": "A",
       "misconceptions": {
         "B": "OX-09"
       },
-      "explanation": "Hình chiếu H(2; 0; 0) (ứng với t = −1); H là trung điểm AA' nên A' = 2H − A = (1; −1; −1)."
+      "explanation": "Hình chiếu $H(2; 0; 0)$ (ứng với $t = -1$); $H$ là trung điểm $AA'$ nên $A' = 2H - A = (1; -1; -1)$."
     },
     {
       "id": "Q19",
       "dang_bai": "Vị trí tương đối",
       "muc_do": "Thông hiểu",
-      "content": "Cho d: x = 2 + t, y = −t, z = 1 + t và (P): x + 2y + z − 3 = 0. Khẳng định nào đúng?",
+      "content": "Cho $d: x = 2 + t, y = -t, z = 1 + t$ và $(P): x + 2y + z - 3 = 0$. Khẳng định nào đúng?",
       "options": {
-        "A": "d nằm trong (P)",
-        "B": "d song song với (P)",
-        "C": "d cắt (P) nhưng không vuông góc",
-        "D": "d vuông góc với (P)"
+        "A": "$d$ nằm trong $(P)$",
+        "B": "$d$ song song với $(P)$",
+        "C": "$d$ cắt $(P)$ nhưng không vuông góc",
+        "D": "$d$ vuông góc với $(P)$"
       },
       "answer": "A",
       "misconceptions": {
         "B": "OX-10"
       },
-      "explanation": "u.n = 1 − 2 + 1 = 0 và điểm M(2; 0; 1) thuộc d thỏa phương trình (P) nên d nằm trong (P)."
+      "explanation": "$\\vec{u} \\cdot \\vec{n} = 1 - 2 + 1 = 0$ và điểm $M(2; 0; 1)$ thuộc $d$ thỏa phương trình $(P)$ nên $d$ nằm trong $(P)$."
     },
     {
       "id": "Q20",
       "dang_bai": "Mặt cầu",
       "muc_do": "Thông hiểu",
-      "content": "Mặt cầu đường kính AB với A(2; 1; 0), B(0; 3; 4) có phương trình",
+      "content": "Mặt cầu đường kính $AB$ với $A(2; 1; 0)$, $B(0; 3; 4)$ có phương trình",
       "options": {
-        "A": "(x − 1)² + (y − 2)² + (z − 2)² = 6",
-        "B": "(x − 1)² + (y − 2)² + (z − 2)² = 24",
-        "C": "(x − 1)² + (y − 2)² + (z − 2)² = √6",
-        "D": "(x + 1)² + (y + 2)² + (z + 2)² = 6"
+        "A": "$(x - 1)^2 + (y - 2)^2 + (z - 2)^2 = 6$",
+        "B": "$(x - 1)^2 + (y - 2)^2 + (z - 2)^2 = 24$",
+        "C": "$(x - 1)^2 + (y - 2)^2 + (z - 2)^2 = \\sqrt{6}$",
+        "D": "$(x + 1)^2 + (y + 2)^2 + (z + 2)^2 = 6$"
       },
       "answer": "A",
       "misconceptions": {
@@ -178,7 +178,7 @@
         "C": "OX-15",
         "D": "OX-07"
       },
-      "explanation": "Tâm I(1; 2; 2) là trung điểm AB, R = AB/2 = √24/2 = √6 nên R² = 6."
+      "explanation": "Tâm $I(1; 2; 2)$ là trung điểm $AB$, $R = \\frac{AB}{2} = \\frac{\\sqrt{24}}{2} = \\sqrt{6}$ nên $R^2 = 6$."
     }
   ],
   "misconception_names": {
@@ -188,9 +188,9 @@
     "OX-03": "Nhớ sai phương trình đoạn chắn",
     "OX-04": "Lấy góc tù cho góc giữa hai mặt phẳng",
     "OX-05": "Hai mặt phẳng song song chưa cùng hệ số",
-    "OX-08": "Không chia −2 khi đọc tâm mặt cầu",
+    "OX-08": "Không chia $-2$ khi đọc tâm mặt cầu",
     "OX-07": "Sai dấu tọa độ tâm mặt cầu",
-    "OX-26": "Nhầm R² với R",
+    "OX-26": "Nhầm $R^2$ với $R$",
     "OX-09": "Nhầm điểm đối xứng với hình chiếu",
     "OX-10": "Kết luận song song, quên trường hợp nằm trong",
     "OX-25": "Nhầm đường kính với bán kính",
