@@ -10,12 +10,12 @@
       "muc_do": "Nhận biết",
       "content": "Khoảng cách từ $A(1; -1; 2)$ đến mặt phẳng $(P): x + 2y - 2z + 4 = 0$ bằng",
       "options": {
-        "A": "$\\frac{1}{3}$",
+        "A": "$\\frac{1}{9}$",
         "B": "$1$",
-        "C": "$\\frac{1}{9}$",
-        "D": "$3$"
+        "C": "$3$",
+        "D": "$\\frac{1}{3}$"
       },
-      "answer": "A",
+      "answer": "D",
       "misconceptions": {
         "B": "OX-01"
       },
@@ -27,15 +27,15 @@
       "muc_do": "Nhận biết",
       "content": "Mặt phẳng đi qua $A(2; -1; 1)$ và có vectơ pháp tuyến $\\vec{n} = (1; 3; -2)$ có phương trình",
       "options": {
-        "A": "$x + 3y - 2z + 3 = 0$",
-        "B": "$x + 3y - 2z - 3 = 0$",
-        "C": "$2x - y + z + 3 = 0$",
-        "D": "$x + 3y - 2z = 0$"
+        "A": "$x + 3y - 2z = 0$",
+        "B": "$2x - y + z + 3 = 0$",
+        "C": "$x + 3y - 2z - 3 = 0$",
+        "D": "$x + 3y - 2z + 3 = 0$"
       },
-      "answer": "A",
+      "answer": "D",
       "misconceptions": {
-        "B": "OX-02",
-        "C": "OX-06"
+        "B": "OX-06",
+        "C": "OX-02"
       },
       "explanation": "$1(x - 2) + 3(y + 1) - 2(z - 1) = 0 \\Leftrightarrow x + 3y - 2z + 3 = 0$."
     },
@@ -45,12 +45,12 @@
       "muc_do": "Thông hiểu",
       "content": "Mặt phẳng đi qua $M(2; 0; 0)$, $N(0; -1; 0)$, $P(0; 0; 3)$ có phương trình",
       "options": {
-        "A": "$3x - 6y + 2z - 6 = 0$",
+        "A": "$3x - 6y + 2z = 0$",
         "B": "$2x - y + 3z - 1 = 0$",
-        "C": "$\\frac{x}{2} + y + \\frac{z}{3} = 1$",
-        "D": "$3x - 6y + 2z = 0$"
+        "C": "$3x - 6y + 2z - 6 = 0$",
+        "D": "$\\frac{x}{2} + y + \\frac{z}{3} = 1$"
       },
-      "answer": "A",
+      "answer": "C",
       "misconceptions": {
         "B": "OX-03"
       },
@@ -62,14 +62,14 @@
       "muc_do": "Thông hiểu",
       "content": "Góc giữa hai mặt phẳng $(P): x + y - 1 = 0$ và $(Q): z - y + 3 = 0$ bằng",
       "options": {
-        "A": "$60^\\circ$",
-        "B": "$120^\\circ$",
-        "C": "$30^\\circ$",
-        "D": "$45^\\circ$"
+        "A": "$30^\\circ$",
+        "B": "$45^\\circ$",
+        "C": "$120^\\circ$",
+        "D": "$60^\\circ$"
       },
-      "answer": "A",
+      "answer": "D",
       "misconceptions": {
-        "B": "OX-04"
+        "C": "OX-04"
       },
       "explanation": "$\\vec{n}_1 = (1; 1; 0)$, $\\vec{n}_2 = (0; -1; 1)$; $\\cos \\varphi = \\frac{|-1|}{\\sqrt{2} \\cdot \\sqrt{2}} = \\frac{1}{2}$ nên góc $60^\\circ$ (góc giữa hai mặt phẳng không vượt quá $90^\\circ$)."
     },
@@ -81,8 +81,8 @@
       "options": {
         "A": "$\\frac{3}{2}$",
         "B": "$\\frac{8}{3}$",
-        "C": "$2$",
-        "D": "$\\frac{1}{2}$"
+        "C": "$\\frac{1}{2}$",
+        "D": "$2$"
       },
       "answer": "A",
       "misconceptions": {
@@ -96,15 +96,15 @@
       "muc_do": "Nhận biết",
       "content": "Một vectơ chỉ phương của đường thẳng $d: \\frac{x + 1}{3} = \\frac{y - 2}{-2} = \\frac{z - 1}{1}$ là",
       "options": {
-        "A": "$(3; -2; 1)$",
-        "B": "$(-1; 2; 1)$",
+        "A": "$(3; 2; 1)$",
+        "B": "$(3; -2; 1)$",
         "C": "$(1; -2; -1)$",
-        "D": "$(3; 2; 1)$"
+        "D": "$(-1; 2; 1)$"
       },
-      "answer": "A",
+      "answer": "B",
       "misconceptions": {
-        "B": "OX-06",
-        "C": "OX-06"
+        "C": "OX-06",
+        "D": "OX-06"
       },
       "explanation": "Vectơ chỉ phương là bộ số ở mẫu: $(3; -2; 1)$. Bộ $(-1; 2; 1)$ là tọa độ một điểm thuộc $d$."
     },
@@ -114,16 +114,16 @@
       "muc_do": "Thông hiểu",
       "content": "Mặt cầu $x^2 + y^2 + z^2 + 4x - 2y + 6z + 5 = 0$ có tâm $I$ và bán kính $R$ là",
       "options": {
-        "A": "$I(-2; 1; -3)$, $R = 3$",
-        "B": "$I(4; -2; 6)$, $R = \\sqrt{51}$",
+        "A": "$I(4; -2; 6)$, $R = \\sqrt{51}$",
+        "B": "$I(-2; 1; -3)$, $R = 9$",
         "C": "$I(2; -1; 3)$, $R = 3$",
-        "D": "$I(-2; 1; -3)$, $R = 9$"
+        "D": "$I(-2; 1; -3)$, $R = 3$"
       },
-      "answer": "A",
+      "answer": "D",
       "misconceptions": {
-        "B": "OX-08",
-        "C": "OX-07",
-        "D": "OX-26"
+        "A": "OX-08",
+        "B": "OX-26",
+        "C": "OX-07"
       },
       "explanation": "$a = -2, b = 1, c = -3$ (chia hệ số cho $-2$); $R^2 = 4 + 1 + 9 - 5 = 9$ nên $R = 3$."
     },
@@ -133,14 +133,14 @@
       "muc_do": "Vận dụng",
       "content": "Điểm đối xứng với $A(3; 1; 1)$ qua mặt phẳng $(P): x + y + z - 2 = 0$ là",
       "options": {
-        "A": "$(1; -1; -1)$",
-        "B": "$(2; 0; 0)$",
-        "C": "$(5; 2; 2)$",
-        "D": "$(-3; -1; -1)$"
+        "A": "$(2; 0; 0)$",
+        "B": "$(-3; -1; -1)$",
+        "C": "$(1; -1; -1)$",
+        "D": "$(5; 2; 2)$"
       },
-      "answer": "A",
+      "answer": "C",
       "misconceptions": {
-        "B": "OX-09"
+        "A": "OX-09"
       },
       "explanation": "Hình chiếu $H(2; 0; 0)$ (ứng với $t = -1$); $H$ là trung điểm $AA'$ nên $A' = 2H - A = (1; -1; -1)$."
     },
@@ -150,14 +150,14 @@
       "muc_do": "Thông hiểu",
       "content": "Cho $d: x = 2 + t, y = -t, z = 1 + t$ và $(P): x + 2y + z - 3 = 0$. Khẳng định nào đúng?",
       "options": {
-        "A": "$d$ nằm trong $(P)$",
-        "B": "$d$ song song với $(P)$",
-        "C": "$d$ cắt $(P)$ nhưng không vuông góc",
-        "D": "$d$ vuông góc với $(P)$"
+        "A": "$d$ vuông góc với $(P)$",
+        "B": "$d$ cắt $(P)$ nhưng không vuông góc",
+        "C": "$d$ song song với $(P)$",
+        "D": "$d$ nằm trong $(P)$"
       },
-      "answer": "A",
+      "answer": "D",
       "misconceptions": {
-        "B": "OX-10"
+        "C": "OX-10"
       },
       "explanation": "$\\vec{u} \\cdot \\vec{n} = 1 - 2 + 1 = 0$ và điểm $M(2; 0; 1)$ thuộc $d$ thỏa phương trình $(P)$ nên $d$ nằm trong $(P)$."
     },
