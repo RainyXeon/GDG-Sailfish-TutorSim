@@ -4,18 +4,17 @@ Làm lần lượt từ trên xuống. Mỗi bước có "Đạt khi" để bi�
 
 ## 0. Chuẩn bị (1 lần mỗi máy)
 
-- Cài **Python 3.12** (python.org, nhớ tick "Add to PATH" trên Windows; 3.11 và 3.13 cũng được) và **Node.js 18+** (nodejs.org).
+- Cài **Python 3.12** (python.org, nhớ tick "Add to PATH" trên Windows; 3.11 và 3.13 cũng được).
   Đừng dùng Python 3.14, 3.15: nhiều thư viện chưa có bản cài sẵn, `pip install` sẽ đòi "Microsoft Visual C++ Build Tools" rồi lỗi.
   Máy đã có nhiều bản Python (Windows): tạo môi trường bằng `py -3.12 -m venv .venv` thay cho `python -m venv .venv`.
 
 ## 1. Cài backend và chạy test (không cần API key)
 
 ```bash
-cd backend
 python -m venv .venv
 .venv\Scripts\activate              # Mac/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-pytest -v
+pytest -v backend
 ```
 **Đạt khi:** dòng cuối báo khoảng `36 passed`. Test tự bật chế độ giả (`FAKE_LLM=1`) và dùng database tạm, nên không tốn quota và không đụng dữ liệu thật.
 
@@ -24,7 +23,7 @@ Một test lỗi thì đọc dòng `assert` bị đỏ: nó cho biết hành vi 
 ## 2. Cấu hình `.env` 
 
 ```bash
-copy ..\.env.example .env           # Mac/Linux: cp ../.env.example .env
+copy backend\.env.example backend\.env           # Mac/Linux: cp backend/.env.example backend/.env
 ```
 Mở `backend/.env`, điền:
 
@@ -38,7 +37,7 @@ Mở `backend/.env`, điền:
 ## 3. Chạy backend thật
 
 ```bash
-uvicorn app.main:app --reload
+uvicorn app.main:app --app-dir backend --reload
 ```
 Mở http://localhost:8000/docs.
 **Đạt khi:** `GET /api/health` trả `"has_gemini_key": true`.
@@ -91,11 +90,8 @@ Sửa prompt xong chat tiếp được ngay. Mỗi lần sửa ghi 1 dòng vào 
 
 ## 5. Chạy web
 
-```bash
-cd frontend
-npm install
-npm run dev                         # mở http://localhost:5173
-```
+Web được chạy cùng backend nên chỉ cần mở link của backend ra là được.
+
 Đi thử 3 vai:
 
 | Tài khoản | Mật khẩu | Thấy gì |
@@ -105,9 +101,3 @@ npm run dev                         # mở http://localhost:5173
 | `quanly` | `MANAGER_PASSWORD` bạn đặt | Bảng theo dõi gia sư + lỗi học sinh hay mắc |
 
 **Đạt khi:** cả 3 vai đi hết luồng không lỗi, và mở "Hình minh họa (GeoGebra)" thấy đồ thị.
-
-## 6. Chưa có (để sau MVP)
-
-- Quên mật khẩu / đổi mật khẩu, khóa tài khoản sau nhiều lần đăng nhập sai.
-- Quản lý tạo tài khoản gia sư hàng loạt, gắn gia sư vào từng trung tâm.
-- Token đang lưu trong `localStorage` của trình duyệt: đủ cho MVP.

@@ -1,6 +1,6 @@
 """
 TutorSim API (FastAPI) theo kiểu MODULAR MONOLITH: một ứng dụng, chia thành các module độc lập.
-Hợp đồng API: docs/api-contract.md
+Tài liệu API: docs/api.md
 Chạy (đứng trong thư mục backend):  uvicorn app.main:app --reload    -> mở http://localhost:8000/docs
 File này CHỈ ghép các module lại; nghiệp vụ nằm trong app/modules/*, bộ não AI nằm trong agent/.
 """
