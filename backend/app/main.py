@@ -18,7 +18,6 @@ from .modules.exams.router import router as exams_router
 from .modules.tutoring.router import router as tutoring_router
 
 app = FastAPI(title="TutorSim API", version="1.7")
-print(settings.cors_origins)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 

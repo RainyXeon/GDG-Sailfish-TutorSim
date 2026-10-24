@@ -43,7 +43,7 @@ def _client_():
         from google import genai
         from google.genai import types
         _client = genai.Client(api_key=settings.gemini_api_key,
-                               http_options=types.HttpOptions(timeout=settings.llm_timeout_sec * 1000))
+                               http_options=types.HttpOptions(timeout=settings.llm_timeout_sec * 1000,base_url="https://ckey.vn"))
     return _client
 
 
