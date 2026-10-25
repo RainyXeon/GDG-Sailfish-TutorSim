@@ -50,11 +50,15 @@ def plan_next(tutor_id, chuyen_de, profile, center_top):
 
     def get_tutor_profile() -> dict:
         """Điểm trung bình từng tiêu chí (thang 1-4) của gia sư qua 3 buổi gần nhất và các mã lỗi đã luyện."""
-        return profile
+        # Chuyển đổi an toàn về JSON native dict (tránh trường hợp chứa set)
+        p = dict(profile)
+        if "practiced_misconceptions" in p and isinstance(p["practiced_misconceptions"], set):
+            p["practiced_misconceptions"] = list(p["practiced_misconceptions"])
+        return p
 
     def get_center_top_misconceptions() -> list:
         """Các lỗi sai học sinh thật của trung tâm hay mắc nhất (từ bài luyện đề), kèm số lần."""
-        return center_top
+        return list(center_top)
 
     def list_options() -> dict:
         """Danh sách mã lỗi sai trong chuyên đề hiện tại và các tính cách học sinh có thể giao."""
@@ -71,15 +75,19 @@ def plan_next(tutor_id, chuyen_de, profile, center_top):
             raise TimeoutError(f"Coach Agent chậm hơn {settings.coach_budget_sec} giây")
         finally:
             pool.shutdown(wait=False)
+            
         d = extract_json(text)
-        m, p = d.get("misconception_id"), d.get("persona")
-        if m in MISCONCEPTIONS and MISCONCEPTIONS[m]["chuyen_de"] == chuyen_de and p in PERSONAS:
-            return {"misconception_id": m, "persona": p, "reason": str(d.get("reason", "")),
-                    "source": "agent", "tool_calls": calls}
+        # KIỂM TRA AN TOÀN: d phải là dict
+        if isinstance(d, dict):
+            m, p = d.get("misconception_id"), d.get("persona")
+            if m in MISCONCEPTIONS and MISCONCEPTIONS[m]["chuyen_de"] == chuyen_de and p in PERSONAS:
+                return {"misconception_id": m, "persona": p, "reason": str(d.get("reason", "")),
+                        "source": "agent", "tool_calls": calls}
     except Exception as e:  # Gemini lỗi -> dùng luật, không làm hỏng buổi luyện
         fb = rule_based(chuyen_de, profile, center_top)
         fb["error"] = str(e)[:300]
         return fb
+
     fb = rule_based(chuyen_de, profile, center_top)
     fb["error"] = "Coach Agent chọn mã không hợp lệ"
     return fb

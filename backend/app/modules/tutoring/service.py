@@ -308,7 +308,7 @@ def finish_session(session_id):
         warnings = [w for x in msgs if x["role"] == "tutor" for w in (db.loads(x["meta_json"], {}) or {}).get("math_warnings", [])]
         try:
             scores, total, evidence, feedback = evaluator.evaluate(_history(m, msgs), m, state.state, warnings,
-                                                                   budget_sec=settings.llm_call_budget_sec)
+                                                                   budget_sec=settings.llm_call_budget_sec,)
         except LLMError as e:
             raise _llm_error("Chưa chấm được", e)
         db.run("""INSERT OR IGNORE INTO reports(session_id, scores_json, total, evidence_json, feedback, created_at)

@@ -1,5 +1,5 @@
 """BỘ CHẤM GIA SƯ (LLM-as-judge): LLM chấm từng tiêu chí + trích bằng chứng; điểm tổng do CODE tính."""
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, model_validator
 
 from .library import RUBRIC
 from .llm import ask_json, load_prompt
@@ -7,19 +7,39 @@ from settings import settings
 
 
 class Evidence(BaseModel):
-    criterion: str
-    quote: str
-    comment: str
+    criterion: str = Field(default="", description="Tên tiêu chí (chinh_xac, chan_doan, ro_rang, goi_mo, thai_do)")
+    quote: str = Field(default="", description="Trích dẫn đoạn hội thoại")
+    comment: str = Field(default="", description="Nhận xét chi tiết")
 
 
 class EvalResult(BaseModel):
-    chinh_xac: int
-    chan_doan: int
-    ro_rang: int
-    goi_mo: int
-    thai_do: int
-    evidence: list[Evidence]
-    feedback: str
+    chinh_xac: int = Field(default=3, description="Điểm chính xác (1-4)")
+    chan_doan: int = Field(default=3, description="Điểm chẩn đoán (1-4)")
+    ro_rang: int = Field(default=3, description="Điểm rõ ràng (1-4)")
+    goi_mo: int = Field(default=3, description="Điểm gợi mở (1-4)")
+    thai_do: int = Field(default=3, description="Điểm thái độ (1-4)")
+    evidence: list[Evidence] = Field(
+        default_factory=list, 
+        description="Danh sách trích dẫn bằng chứng. BẮT BUỘC trả về key 'evidence', dùng [] nếu không có."
+    )
+    feedback: str = Field(default="", description="Nhận xét chung dành cho gia sư")
+
+    @model_validator(mode='before')
+    @classmethod
+    def sanitize_eval_data(cls, data):
+        """Xử lý phòng thủ khi Gemini bỏ sót trường hoặc trả về null."""
+        if isinstance(data, dict):
+            # Tự động gán mặc định nếu thiếu key hoặc bị null
+            if 'evidence' not in data or data['evidence'] is None:
+                data['evidence'] = []
+            if 'feedback' not in data or data['feedback'] is None:
+                data['feedback'] = ""
+            
+            # Đảm bảo các trường điểm luôn có giá trị số nguyên
+            for field in ("chinh_xac", "chan_doan", "ro_rang", "goi_mo", "thai_do"):
+                if field not in data or data[field] is None:
+                    data[field] = 3
+        return data
 
 
 def rubric_text():

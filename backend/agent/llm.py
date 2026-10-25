@@ -173,22 +173,60 @@ def ask_json(prompt, schema, temperature=0.2, fake=None, model=None, strong=Fals
     if settings.fake_llm:
         return schema.model_validate(fake)
     from google.genai import types
+    import re
+
     model = model or settings.model
-    config = _config(types, model, strong=strong, temperature=temperature, response_mime_type="application/json", response_schema=schema,
-                     automatic_function_calling=_no_afc(types))
+    
+    # 1. Ép thêm system_instruction cứng vào config
+    # Đảm bảo Gemini luôn giữ vai trò là một JSON Serializer thuần túy
+    json_system_instruction = (
+        "You are a precise JSON generator. You MUST respond with ONLY a valid JSON object "
+        "matching the requested schema. Strictly NO markdown code block wrappers (do not use ```json), "
+        "NO introductory or conversational text, and NO trailing explanation."
+    )
+    
+    # Giả sử hàm _config của bạn cho phép truyền system_instruction 
+    # Hoặc bạn inject trực tiếp vào config bên trong hàm này
+    config = _config(
+        types, 
+        model, 
+        strong=strong, 
+        temperature=temperature, 
+        response_mime_type="application/json", 
+        response_schema=schema,
+        automatic_function_calling=_no_afc(types)
+    )
+    
+    # Đảm bảo system_instruction được gán trong config object của google.genai
+    if hasattr(config, "system_instruction") and not config.system_instruction:
+        config.system_instruction = json_system_instruction
+
     last = None
     deadline = time.monotonic() + (budget_sec or settings.llm_call_budget_sec)
-    for _ in range(2):  # Gemini đôi khi trả JSON rỗng / cụt -> hỏi lại 1 lần (trong cùng ngân sách thời gian)
+    
+    for _ in range(2):
         left = deadline - time.monotonic()
         if left < 5:
             break
+            
         resp = _call(model, prompt, config, budget_sec=left)
+        
+        # Đã parse sẵn qua Pydantic nhờ response_schema
         if getattr(resp, "parsed", None) is not None:
             return resp.parsed
+            
+        raw_text = (resp.text or "").strip()
+        
+        # 2. Bắt lớp phòng thủ (Sanitization) - Cắt bỏ câu dẫn tiếng Việt hoặc Markdown block nếu Gemini vẫn vi phạm
         try:
-            return schema.model_validate_json(resp.text or "")
-        except Exception as e:  # trước đây lỗi này lọt ra ngoài thành HTTP 500
+            # Lọc trích xuất đúng vùng chứa ngoặc nhọn JSON { ... }
+            match = re.search(r"(\{[\s\S]*\})", raw_text)
+            clean_json_str = match.group(1) if match else raw_text
+            
+            return schema.model_validate_json(clean_json_str)
+        except Exception as e:
             last = e
+            
     raise LLMError(f"Gemini trả về dữ liệu không đúng định dạng: {str(last)[:200]}", kind="bad_output")
 
 
